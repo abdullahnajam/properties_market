@@ -5,6 +5,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:easy_localization/easy_localization.dart';
 class PropertyDetail extends StatefulWidget {
   Property _property;
 
@@ -110,7 +111,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceBetween,
                           children: [
-                            Text("Property Details",style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),),
+                            Text('propertyDetails'.tr(),style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),),
                             IconButton(icon: Icon(_iconData,color: _color), onPressed: checkFavourite),
                           ],
                         ),
@@ -158,7 +159,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                 Container(color: Colors.grey[300],height: 3,),
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Details",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
+                  child: Text('details'.tr(),style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
                 ),
                 Container(
                   margin: EdgeInsets.all(10),
@@ -176,7 +177,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                                 children: [
                                   Icon(Icons.house_outlined),
                                   SizedBox(width: 10,),
-                                  Text("Type",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                  Text('type'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
                                 ],
                               ),
                             ),
@@ -200,7 +201,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                                 children: [
                                   Icon(Icons.monetization_on_outlined),
                                   SizedBox(width: 10,),
-                                  Text("Price",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                  Text('price'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
                                 ],
                               ),
                             ),
@@ -224,7 +225,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                                 children: [
                                   Icon(Icons.king_bed_outlined),
                                   SizedBox(width: 10,),
-                                  Text("Bed(s)",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                  Text('bed'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
                                 ],
                               ),
                             ),
@@ -248,7 +249,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                                 children: [
                                   Icon(Icons.square_foot_outlined),
                                   SizedBox(width: 10,),
-                                  Text("Area",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                  Text('area'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
                                 ],
                               ),
                             ),
@@ -272,7 +273,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                                 children: [
                                   Icon(Icons.check_circle_outline),
                                   SizedBox(width: 10,),
-                                  Text("Purpose",style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                  Text('purpose'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
                                 ],
                               ),
                             ),
@@ -289,7 +290,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                 ),
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Location",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
+                  child: Text('location'.tr(),style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
                 ),
                 Container(
                   margin: EdgeInsets.all(10),
@@ -297,7 +298,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                 ),
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Description",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
+                  child: Text('description'.tr(),style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
                 ),
                 Container(
                   margin: EdgeInsets.all(10),

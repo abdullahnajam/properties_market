@@ -4,7 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:propertymarket/data/img.dart';
 import 'package:propertymarket/data/my_colors.dart';
 import 'package:propertymarket/screens/favourites.dart';
+import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/widget/my_text.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 class MenuDrawer extends StatefulWidget {
 
@@ -90,20 +92,20 @@ class MenuDrawerState extends State<MenuDrawer> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Change Language",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('changeLanguage'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 ListTile(
                   onTap: (){
+                    context.locale = Locale('ar', 'EG');
                     Navigator.pop(context);
                   },
-                  leading: Text(""),
-                  title: Text("Arabic"),
+                  title: Text('arabic'.tr()),
                 ),
                 ListTile(
                   onTap: (){
+                    context.locale = Locale('en', 'US');
                     Navigator.pop(context);
                   },
-                  leading: Text(""),
                   title: Text("English"),
                 ),
                 SizedBox(
@@ -128,9 +130,15 @@ class MenuDrawerState extends State<MenuDrawer> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: <Widget>[
           SizedBox(height: 30,),
-          Container(
-            alignment: Alignment.center,
-            child: Image.asset("assets/images/logo_english.jpeg",height: 150,),
+          InkWell(
+            onTap: (){
+              Navigator.pushReplacement(context, new MaterialPageRoute(
+                  builder: (context) => HomePage()));
+            },
+            child: Container(
+              alignment: Alignment.center,
+              child: Image.asset('icon'.tr(),height: 150,),
+            ),
           ),
           SizedBox(height: 30,),
           InkWell(
@@ -143,7 +151,7 @@ class MenuDrawerState extends State<MenuDrawer> {
                 children: <Widget>[
                   Icon(Icons.favorite_border, color: MyColors.grey_20, size: 20),
                   Container(width: 20),
-                  Expanded(child: Text("Favourites", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                  Expanded(child: Text('favourite'.tr(), style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
                 ],
               ),
             ),
@@ -158,7 +166,7 @@ class MenuDrawerState extends State<MenuDrawer> {
                 children: <Widget>[
                   Icon(Icons.language, color: MyColors.grey_20, size: 20),
                   Container(width: 20),
-                  Expanded(child: Text("Change Language", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                  Expanded(child: Text('changeLanguage'.tr(), style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
                 ],
               ),
             ),
@@ -172,7 +180,7 @@ class MenuDrawerState extends State<MenuDrawer> {
                 children: <Widget>[
                   Icon(Icons.add, color: MyColors.grey_20, size: 20),
                   Container(width: 20),
-                  Expanded(child: Text("Add Property", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                  Expanded(child: Text('addProperty'.tr(), style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
                 ],
               ),
             ),
@@ -191,7 +199,7 @@ class MenuDrawerState extends State<MenuDrawer> {
                 children: <Widget>[
                   Icon(Icons.power_settings_new, color: MyColors.grey_20, size: 20),
                   Container(width: 20),
-                  Expanded(child: Text("Logout", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                  Expanded(child: Text('logout'.tr(), style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
                 ],
               ),
             ),

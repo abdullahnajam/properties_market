@@ -110,7 +110,7 @@ class _RegisterState extends State<Register> {
                                       print('User is currently signed out!');
                                     } else {
                                       print('User is signed in!');
-                                      Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
+                                      Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
                                     }
                                   });
                                 });

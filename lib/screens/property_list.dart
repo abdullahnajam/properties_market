@@ -8,6 +8,7 @@ import 'package:propertymarket/screens/property_detail.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:propertymarket/widget/property_tile.dart';
 import 'package:toast/toast.dart';
+import 'package:easy_localization/easy_localization.dart';
 enum rentOrBuy { rent, buy }
 class PropertyList extends StatefulWidget {
   String country,city,area,type;
@@ -25,10 +26,10 @@ class _PropertyListState extends State<PropertyList> {
   String selectedAreaId="";
   String selectedTypeId="";
 
-  String selectedCountryName="Select Country";
-  String selectedCityName="Select City";
-  String selectedAreaName="Select Area";
-  String selectedTypeName="Select Type";
+  String selectedCountryName='selectCountry'.tr();
+  String selectedCityName='selectCity'.tr();
+  String selectedAreaName='selectArea'.tr();
+  String selectedTypeName='selectType'.tr();
 
   Future<List<LocationModel>> getCountryList() async {
     List<LocationModel> list=new List();
@@ -139,7 +140,7 @@ class _PropertyListState extends State<PropertyList> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Countries",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('country'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getCountryList(),
@@ -172,7 +173,7 @@ class _PropertyListState extends State<PropertyList> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -221,7 +222,7 @@ class _PropertyListState extends State<PropertyList> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("City",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('city'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getCityList(),
@@ -254,7 +255,7 @@ class _PropertyListState extends State<PropertyList> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -303,7 +304,7 @@ class _PropertyListState extends State<PropertyList> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Area",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('area'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getAreaList(),
@@ -336,7 +337,7 @@ class _PropertyListState extends State<PropertyList> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -385,7 +386,7 @@ class _PropertyListState extends State<PropertyList> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Property Type",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('propertyType'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getTypeList(),
@@ -418,7 +419,7 @@ class _PropertyListState extends State<PropertyList> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -554,7 +555,7 @@ class _PropertyListState extends State<PropertyList> {
                         ),
                         Container(
                           alignment: Alignment.center,
-                          child: Text("Property List",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),
+                          child: Text('propertyList'.tr(),style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),
                         ),
                       ],
                     ),
@@ -580,7 +581,7 @@ class _PropertyListState extends State<PropertyList> {
                             ),
                             child: Row(
                               children: [
-                                Text("Filters",style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
+                                Text('filter'.tr(),style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
                                 SizedBox(width: 5,),
                                 Image.asset("assets/images/filter.png",width: 20,height: 20,color: primaryColor,)
                               ],
@@ -605,7 +606,7 @@ class _PropertyListState extends State<PropertyList> {
                             ),
                             child: Row(
                               children: [
-                                Text("Sort",style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
+                                Text('sort'.tr(),style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
                                 SizedBox(width: 5,),
                                 Image.asset("assets/images/sort.png",width: 20,height: 20,color: primaryColor,)
                               ],
@@ -615,7 +616,7 @@ class _PropertyListState extends State<PropertyList> {
 
                       ],
                     ),
-                    margin: EdgeInsets.only(top: 10,right: 10),
+                    margin: EdgeInsets.only(top: 10,right: 10,left: 10),
                   ),
                   isLoaded?
                   list.length>0?Container(
@@ -633,7 +634,7 @@ class _PropertyListState extends State<PropertyList> {
                         );
                       },
                     ),
-                  ):Center(child: Text("No Data Found"),)
+                  ):Container(margin: EdgeInsets.only(top: 200),child: Text('noData'.tr()),)
                       :Center(child: CircularProgressIndicator(),)
 
                 ],
@@ -656,7 +657,7 @@ class _PropertyListState extends State<PropertyList> {
                     children: [
                       Container(
                         margin: EdgeInsets.all(10),
-                        child: Text("Sort By",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
+                        child: Text('sortBy'.tr(),style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
                       ),
                       Container(
                           child: ListTile(
@@ -668,7 +669,7 @@ class _PropertyListState extends State<PropertyList> {
 
                             },
                             leading: Icon(Icons.arrow_upward,color: Colors.black,),
-                            title: Text("Prices Low to High",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
+                            title: Text('LowToHigh'.tr(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
 
                           )
                       ),
@@ -683,7 +684,7 @@ class _PropertyListState extends State<PropertyList> {
                               });
                             },
                             leading: Icon(Icons.arrow_downward,color: Colors.black,),
-                            title: Text("Prices High to Low",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
+                            title: Text('HighToLow'.tr(),style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
 
                           )
                       ),
@@ -708,8 +709,8 @@ class _PropertyListState extends State<PropertyList> {
                   child: Column(
                     children: [
                       Container(
-                        margin: EdgeInsets.all(10),
-                        child: Text("Filter",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
+                        margin: EdgeInsets.all(5),
+                        child: Text('filter'.tr(),style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
                       ),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
@@ -725,7 +726,7 @@ class _PropertyListState extends State<PropertyList> {
                             },
                           ),
                           new Text(
-                            'Rent',
+                            'rent'.tr(),
                             style: new TextStyle(fontSize: 16.0),
                           ),
                           new Radio(
@@ -739,7 +740,7 @@ class _PropertyListState extends State<PropertyList> {
                             },
                           ),
                           new Text(
-                            'Buy',
+                            'buy'.tr(),
                             style: new TextStyle(
                               fontSize: 16.0,
                             ),
@@ -820,7 +821,7 @@ class _PropertyListState extends State<PropertyList> {
                                 ],
                               )
                           ),
-                          child: Text("Find Property",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
+                          child: Text('findProperty'.tr(),textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
                         ),
                       )
                     ],

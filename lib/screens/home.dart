@@ -9,6 +9,7 @@ import 'package:propertymarket/navigator/menu_drawer.dart';
 import 'package:propertymarket/screens/property_list.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:toast/toast.dart';
+import 'package:easy_localization/easy_localization.dart';
 
 enum rentOrBuy { rent, buy }
 class HomePage extends StatefulWidget {
@@ -29,10 +30,10 @@ class _HomePageState extends State<HomePage> {
   String selectedAreaId="";
   String selectedTypeId="";
 
-  String selectedCountryName="Select Country";
-  String selectedCityName="Select City";
-  String selectedAreaName="Select Area";
-  String selectedTypeName="Select Type";
+  String selectedCountryName='selectCountry'.tr();
+  String selectedCityName='selectCity'.tr();
+  String selectedAreaName='selectArea'.tr();
+  String selectedTypeName='selectType'.tr();
   
   Future<List<LocationModel>> getCountryList() async {
     List<LocationModel> list=new List();
@@ -143,7 +144,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Countries",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('country'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getCountryList(),
@@ -176,7 +177,7 @@ class _HomePageState extends State<HomePage> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -225,7 +226,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("City",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('city'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getCityList(),
@@ -258,7 +259,7 @@ class _HomePageState extends State<HomePage> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -307,7 +308,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Area",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('area'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getAreaList(),
@@ -340,7 +341,7 @@ class _HomePageState extends State<HomePage> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -389,7 +390,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("Property Type",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text('propertyType'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
                 FutureBuilder<List<LocationModel>>(
                   future: getTypeList(),
@@ -422,7 +423,7 @@ class _HomePageState extends State<HomePage> {
                       else {
                         return new Center(
                           child: Container(
-                              child: Text("No data found")
+                              child: Text('noData'.tr())
                           ),
                         );
                       }
@@ -502,7 +503,7 @@ class _HomePageState extends State<HomePage> {
                       children: [
 
                         Container(
-                          child: Text("Welcome",style: TextStyle(color: Colors.white,fontSize: 25),),
+                          child: Text('title'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
                         ),
                         InkWell(
                           onTap: (){
@@ -516,10 +517,10 @@ class _HomePageState extends State<HomePage> {
                         alignment: Alignment.center,
                         child: Column(
                           children: [
-                            SizedBox(height: 20,),
-                            Text("Let's  find your",style: TextStyle(color: Colors.white,fontSize: 25),),
-                            SizedBox(height: 5,),
-                            Text("Dream Home",style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.w700),),
+                            SizedBox(height: 10,),
+                            Text('slogan1'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
+                            SizedBox(height: 2,),
+                            Text('slogan2'.tr(),style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.w700),),
                           ],
                         )
                     )
@@ -573,8 +574,8 @@ class _HomePageState extends State<HomePage> {
                       else {
                         return new Center(
                           child: Container(
-                              margin: EdgeInsets.only(top: 100),
-                              child: Text("This recipe doesnot have any ingredients")
+                              margin: EdgeInsets.only(top: 10),
+
                           ),
                         );
                       }
@@ -611,7 +612,7 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                     new Text(
-                      'Rent',
+                      'rent'.tr(),
                       style: new TextStyle(fontSize: 16.0),
                     ),
                     new Radio(
@@ -625,7 +626,7 @@ class _HomePageState extends State<HomePage> {
                       },
                     ),
                     new Text(
-                      'Buy',
+                      'buy'.tr(),
                       style: new TextStyle(
                         fontSize: 16.0,
                       ),
@@ -702,7 +703,7 @@ class _HomePageState extends State<HomePage> {
                           ],
                         )
                     ),
-                    child: Text("Find Property",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
+                    child: Text('findProperty'.tr(),textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
                   ),
                 )
               ],

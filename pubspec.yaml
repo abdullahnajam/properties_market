@@ -39,7 +39,7 @@ dependencies:
   cached_network_image: ^2.5.1
   page_transition: ^1.1.7+6
   flutter_launcher_icons: ^0.8.1
-  easy_localization: any
+  easy_localization: ^2.3.2
   image_picker: ^0.6.7+17
 
 flutter_icons:
@@ -63,6 +63,8 @@ flutter:
   uses-material-design: true
 
   assets:
+    - assets/json/ar-EG.json
+    - assets/json/en-US.json
     - assets/images/
 
   # To add assets to your application, add an assets section, like this:

@@ -118,10 +118,10 @@ class _LoginState extends State<Login> {
                                     } else {
                                       print('User is signed in!');
                                       if(user.uid=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
-                                        Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminHome()));
+                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminHome()));
                                       }
                                       else
-                                        Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
+                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
 
                                     }
                                   });

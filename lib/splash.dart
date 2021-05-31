@@ -41,8 +41,7 @@ class _SplashScreenState extends State<SplashScreen> {
             MaterialPageRoute(builder: (BuildContext context) => Login()));
       } else {
         if(user=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
-          Navigator.pushReplacement(context,
-              MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
         }
         else
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));

@@ -7,12 +7,14 @@ import 'package:propertymarket/admin/admin_property_detail_view.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/navigator/admin_drawer.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:easy_localization/easy_localization.dart';
 class AdminHome extends StatefulWidget {
   @override
   _AdminHomeState createState() => _AdminHomeState();
 }
 
 class _AdminHomeState extends State<AdminHome> {
+
   static String timeAgoSinceDate(String dateString, {bool numericDates = true}) {
     DateTime date = DateTime.parse(dateString);
     final date2 = DateTime.now();
@@ -239,5 +241,11 @@ class _AdminHomeState extends State<AdminHome> {
         )
 
     );
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    context.locale = Locale('en', 'US');
   }
 }
