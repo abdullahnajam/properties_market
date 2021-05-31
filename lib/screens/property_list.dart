@@ -1,29 +1,25 @@
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
 import 'package:propertymarket/model/location.dart';
-import 'package:propertymarket/model/slideshow.dart';
+import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/navigator/menu_drawer.dart';
-import 'package:propertymarket/screens/property_list.dart';
+import 'package:propertymarket/screens/property_detail.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:propertymarket/widget/property_tile.dart';
 import 'package:toast/toast.dart';
-
 enum rentOrBuy { rent, buy }
-class HomePage extends StatefulWidget {
+class PropertyList extends StatefulWidget {
+  String country,city,area,type;
+  bool isRent;
+
+  PropertyList(this.country, this.city, this.area, this.type, this.isRent);
+
   @override
-  _HomePageState createState() => _HomePageState();
+  _PropertyListState createState() => _PropertyListState();
 }
 
-class _HomePageState extends State<HomePage> {
-
-
-  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
-  void _openDrawer () {
-    _drawerKey.currentState.openDrawer();
-  }
-
+class _PropertyListState extends State<PropertyList> {
   String selectedCountryId="";
   String selectedCityId="";
   String selectedAreaId="";
@@ -33,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   String selectedCityName="Select City";
   String selectedAreaName="Select Area";
   String selectedTypeName="Select Type";
-  
+
   Future<List<LocationModel>> getCountryList() async {
     List<LocationModel> list=new List();
     final databaseReference = FirebaseDatabase.instance.reference();
@@ -447,280 +443,395 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-
-
+  bool isLoaded=false;
   rentOrBuy _rentOrBuy = rentOrBuy.rent;
   bool isRent=true;
-  Future<List<Widget>> getSlideShow() async{
-    List<SlideShow> slideShowList=[];
-    List<Widget> slideShowWidget=[];
-    final databaseReference = FirebaseDatabase.instance.reference();
-    await databaseReference.child("slideshow").once().then((DataSnapshot dataSnapshot){
+  bool sortOpened=false;
+  bool filterOpened=false;
+  bool isAccessding=false;
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getPropertyList();
+  }
+  final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
+  void _openDrawer () {
+    _drawerKey.currentState.openDrawer();
+  }
+  List<Property> list=[];
+  getPropertyList() async {
 
+    final databaseReference = FirebaseDatabase.instance.reference();
+    await databaseReference.child("property").once().then((DataSnapshot dataSnapshot){
       if(dataSnapshot.value!=null){
         var KEYS= dataSnapshot.value.keys;
         var DATA=dataSnapshot.value;
 
         for(var individualKey in KEYS) {
-          SlideShow slideShow = new SlideShow(
-            individualKey,
-            DATA[individualKey]['image'],
+          Property property = new Property(
+              individualKey,
+              DATA[individualKey]['image'],
+              DATA[individualKey]['price'].toString(),
+              DATA[individualKey]['location'],
+              DATA[individualKey]['country'],
+              DATA[individualKey]['city'],
+              DATA[individualKey]['area'],
+              DATA[individualKey]['typeOfProperty'],
+              DATA[individualKey]['propertyCategory'],
+              DATA[individualKey]['whatsapp'].toString(),
+              DATA[individualKey]['call'].toString(),
+              DATA[individualKey]['email'],
+              DATA[individualKey]['beds'].toString(),
+              DATA[individualKey]['bath'].toString(),
+              DATA[individualKey]['measurementArea'].toString(),
+              DATA[individualKey]['datePosted'],
+              DATA[individualKey]['description'],
+              DATA[individualKey]['numericalPrice']
           );
-          slideShowList.add(slideShow);
-          slideShowWidget.add(_slider(slideShow.image));
+          if(property.country==widget.country && property.city==widget.city && property.area==widget.area && property.typeOfProperty==widget.type){
+            if(widget.isRent && property.propertyCategory=="rent"){
+              setState(() {
+                list.add(property);
+              });
+            }
+            if(!widget.isRent && property.propertyCategory=="buy"){
+              setState(() {
+                list.add(property);
+              });
+            }
+          }
 
 
         }
       }
     });
-    return slideShowWidget;
+    setState(() {
+      isLoaded=true;
+    });
+  }
+
+  getSortedPropertyList() {
+    setState(() {
+      if(isAccessding){
+        list.sort((a, b) => a.numericalPrice.compareTo(b.numericalPrice));
+      }
+      else{
+
+      }
+    });
   }
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: Color(0xfff2f8fc),
-      key: _drawerKey,
-      drawer: MenuDrawer(),
-      body: Column(
-        children: [
-          Stack(
-            children: [
-              Container(
-                padding: EdgeInsets.only(top: 40,left: 10,right: 10),
-                decoration: BoxDecoration(
-                    color: primaryColor,
-                    borderRadius: BorderRadius.only(
-                        bottomLeft: Radius.circular(20),
-                        bottomRight: Radius.circular(20)
-                    )
-                ),
-                height: MediaQuery.of(context).size.height*0.35,
-                child: Column(
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
 
-                        Container(
-                          child: Text("Welcome",style: TextStyle(color: Colors.white,fontSize: 25),),
+    return Scaffold(
+        backgroundColor: Colors.grey[200],
+        key: _drawerKey,
+        drawer: MenuDrawer(),
+        body: SafeArea(
+          child: Stack(
+            children: [
+              Column(
+                children: [
+                  Container(
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      border: Border(
+                        bottom: BorderSide(width: 0.2, color: Colors.grey[500]),
+                      ),
+
+                    ),
+                    child: Stack(
+                      children: [
+                        GestureDetector(
+                          child: Container(
+                              margin: EdgeInsets.only(left: 15),
+                              alignment: Alignment.centerLeft,
+                              child: Icon(Icons.menu,color: primaryColor,)
+                          ),
+                          onTap: ()=>_openDrawer(),
                         ),
-                        InkWell(
-                          onTap: (){
-                            _openDrawer();
-                          },
-                          child: Icon(Icons.menu,color: Colors.white,size: 25,),
+                        Container(
+                          alignment: Alignment.center,
+                          child: Text("Property List",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),
                         ),
                       ],
                     ),
-                    Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: [
-                            SizedBox(height: 20,),
-                            Text("Let's  find your",style: TextStyle(color: Colors.white,fontSize: 25),),
-                            SizedBox(height: 5,),
-                            Text("Dream Home",style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.w700),),
-                          ],
+                  ),
+                  Container(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        InkWell(
+                          onTap: (){
+                            setState(() {
+                              sortOpened=false;
+                              filterOpened=true;
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(left: 10,right: 10),
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: primaryColor),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Text("Filters",style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
+                                SizedBox(width: 5,),
+                                Image.asset("assets/images/filter.png",width: 20,height: 20,color: primaryColor,)
+                              ],
+                            ),
+                          ),
+                        ),
+                        SizedBox(width: 10,),
+                        InkWell(
+                          onTap: (){
+                            setState(() {
+                              sortOpened=true;
+                              filterOpened=false;
+                            });
+                          },
+                          child: Container(
+                            padding: EdgeInsets.only(left: 10,right: 10),
+                            height: 40,
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              border: Border.all(color: primaryColor),
+                              borderRadius: BorderRadius.circular(10),
+                            ),
+                            child: Row(
+                              children: [
+                                Text("Sort",style: TextStyle(color: primaryColor,fontSize: 16,fontWeight: FontWeight.w500),),
+                                SizedBox(width: 5,),
+                                Image.asset("assets/images/sort.png",width: 20,height: 20,color: primaryColor,)
+                              ],
+                            ),
+                          ),
                         )
-                    )
 
-                  ],
+                      ],
+                    ),
+                    margin: EdgeInsets.only(top: 10,right: 10),
+                  ),
+                  isLoaded?
+                  list.length>0?Container(
+                    margin: EdgeInsets.all(10),
+                    child: ListView.builder(
+                      shrinkWrap: true,
+                      itemCount: list.length,
+                      itemBuilder: (BuildContext context,int index){
+                        return GestureDetector(
+                            onTap: (){
+                              Navigator.push(
+                                  context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index])));
+                            },
+                            child: PropertyTile(list[index])
+                        );
+                      },
+                    ),
+                  ):Center(child: Text("No Data Found"),)
+                      :Center(child: CircularProgressIndicator(),)
+
+                ],
+              ),
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  height: sortOpened?180:0,
+                  width: MediaQuery.of(context).size.width,
+                  duration: const Duration(seconds: 2),
+                  curve: Curves.fastOutSlowIn,
+                  decoration: BoxDecoration(
+                    color: Colors.white,
+                    borderRadius: BorderRadius.only(
+                      topRight: Radius.circular(30),
+                      topLeft: Radius.circular(30),
+                    )
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text("Sort By",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
+                      ),
+                      Container(
+                          child: ListTile(
+                            onTap: (){
+                              setState(() {
+                                list.sort((a, b) => a.numericalPrice.compareTo(b.numericalPrice));
+                                sortOpened=false;
+                              });
+
+                            },
+                            leading: Icon(Icons.arrow_upward,color: Colors.black,),
+                            title: Text("Prices Low to High",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
+
+                          )
+                      ),
+                      Container(
+
+                          child: ListTile(
+                            onTap: (){
+                              setState(() {
+                                list.sort((a, b) => a.numericalPrice.compareTo(b.numericalPrice));
+                                list=list.reversed.toList();
+                                sortOpened=false;
+                              });
+                            },
+                            leading: Icon(Icons.arrow_downward,color: Colors.black,),
+                            title: Text("Prices High to Low",style: TextStyle(fontSize: 18,fontWeight: FontWeight.w300,color: Colors.black),),
+
+                          )
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              Container(
-                height: 150,
-
-                margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height*0.23,
-                  left: MediaQuery.of(context).size.width*0.07,
-                  right: MediaQuery.of(context).size.width*0.07,
-                ),
-                child: FutureBuilder<List<Widget>>(
-                  future: getSlideShow(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return ImageSlideshow(
-
-                          /// Width of the [ImageSlideshow].
-                          width: double.infinity,
-
-
-                          /// The page to show when first creating the [ImageSlideshow].
-                          initialPage: 0,
-
-                          /// The color to paint the indicator.
-                          indicatorColor: Colors.blue,
-
-                          /// The color to paint behind th indicator.
-                          indicatorBackgroundColor: Colors.white,
-
-
-                          /// The widgets to display in the [ImageSlideshow].
-                          /// Add the sample image file into the images folder
-                          children: snapshot.data,
-
-                          /// Called whenever the page in the center of the viewport changes.
-                          onPageChanged: (value) {
-                            print('Page changed: $value');
-                          },
-
-                          /// Auto scroll interval.
-                          /// Do not auto scroll with null or 0.
-                          autoPlayInterval: 10000,
-                        );
-                      }
-                      else {
-                        return new Center(
-                          child: Container(
-                              margin: EdgeInsets.only(top: 100),
-                              child: Text("This recipe doesnot have any ingredients")
+              Align(
+                alignment: Alignment.bottomCenter,
+                child: AnimatedContainer(
+                  height: filterOpened?MediaQuery.of(context).size.height*0.6:0,
+                  width: MediaQuery.of(context).size.width,
+                  duration: const Duration(seconds: 2),
+                  curve: Curves.fastOutSlowIn,
+                  decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.only(
+                        topRight: Radius.circular(30),
+                        topLeft: Radius.circular(30),
+                      )
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text("Filter",style: TextStyle(fontSize: 22,fontWeight: FontWeight.w500,color: Colors.black),),
+                      ),
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          new Radio(
+                            value: rentOrBuy.rent,
+                            groupValue: _rentOrBuy,
+                            onChanged: (rentOrBuy value) {
+                              setState(() {
+                                isRent = true;
+                                _rentOrBuy = value;
+                              });
+                            },
                           ),
-                        );
-                      }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+                          new Text(
+                            'Rent',
+                            style: new TextStyle(fontSize: 16.0),
+                          ),
+                          new Radio(
+                            value: rentOrBuy.buy,
+                            groupValue: _rentOrBuy,
+                            onChanged: (rentOrBuy value) {
+                              setState(() {
+                                isRent = false;
+                                _rentOrBuy = value;
+                              });
+                            },
+                          ),
+                          new Text(
+                            'Buy',
+                            style: new TextStyle(
+                              fontSize: 16.0,
+                            ),
+                          ),
+                        ],
+                      ),
+                      Divider(color: Colors.grey,),
+                      ListTile(
+                        onTap: ()=>_showCountryDailog(),
+                        leading: Image.asset("assets/images/country.png",width: 30,height: 30,),
+                        title: Text(selectedCountryName,style: TextStyle(color: Colors.grey[600]),),
+                        trailing: Icon(Icons.keyboard_arrow_down),
+                      ),
+                      Divider(color: Colors.grey,),
+                      ListTile(
+                        onTap: (){
+                          if(selectedCountryId!=null){
+                            _showCityDailog();
+                          }
+                          else{
+                            Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                          }
+                        },
+                        leading: Image.asset("assets/images/city.png",width: 30,height: 30,),
+                        title: Text(selectedCityName,style: TextStyle(color: Colors.grey[600]),),
+                        trailing: Icon(Icons.keyboard_arrow_down),
+                      ),
+                      Divider(color: Colors.grey,),
+                      ListTile(
+                        onTap: (){
+                          if(selectedCountryId!=null && selectedCityId!=null){
+                            _showAreaDailog();
+                          }
+                          else{
+                            Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                          }
+                        },
+                        leading: Image.asset("assets/images/area.png",width: 30,height: 30,),
+                        title: Text(selectedAreaName,style: TextStyle(color: Colors.grey[600]),),
+                        trailing: Icon(Icons.keyboard_arrow_down),
+                      ),
+                      Divider(color: Colors.grey,),
+                      ListTile(
+                        onTap: ()=>_showTypeDailog(),
+                        leading: Image.asset("assets/images/home.png",width: 30,height: 30,),
+                        title: Text(selectedTypeName,style: TextStyle(color: Colors.grey[600]),),
+                        trailing: Icon(Icons.keyboard_arrow_down),
+                      ),
+                      InkWell(
+                        onTap: (){
+                          setState(() {
+                            widget.country=selectedCountryName;
+                            widget.city=selectedCityName;
+                            widget.area=selectedAreaName;
+                            widget.type=selectedTypeName;
+                            widget.isRent=isRent;
+                            list.clear();
+                            filterOpened=false;
+                          });
+                          getPropertyList();
+
+                        },
+                        child: Container(
+                          alignment: Alignment.center,
+                          height: 60,
+                          width: double.maxFinite,
+                          decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topRight,
+                                end: Alignment.bottomLeft,
+                                stops: [
+                                  0.4,
+                                  0.6,
+                                ],
+                                colors: [
+                                  Color(0xff307bd6),
+                                  Color(0xff2895fa),
+                                ],
+                              )
+                          ),
+                          child: Text("Find Property",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
+                        ),
+                      )
+                    ],
+                  ),
                 ),
               )
+
             ],
-          ),
-          Container(
-            height: MediaQuery.of(context).size.height*0.54,
-            margin: EdgeInsets.only(left: 10,right: 10,top: 10),
-            color: Colors.white,
-            child: Column(
-              children: [
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    new Radio(
-                      value: rentOrBuy.rent,
-                      groupValue: _rentOrBuy,
-                      onChanged: (rentOrBuy value) {
-                        setState(() {
-                          isRent = true;
-                          _rentOrBuy = value;
-                        });
-                      },
-                    ),
-                    new Text(
-                      'Rent',
-                      style: new TextStyle(fontSize: 16.0),
-                    ),
-                    new Radio(
-                      value: rentOrBuy.buy,
-                      groupValue: _rentOrBuy,
-                      onChanged: (rentOrBuy value) {
-                        setState(() {
-                          isRent = false;
-                          _rentOrBuy = value;
-                        });
-                      },
-                    ),
-                    new Text(
-                      'Buy',
-                      style: new TextStyle(
-                        fontSize: 16.0,
-                      ),
-                    ),
-                  ],
-                ),
-                Divider(color: Colors.grey,),
-                ListTile(
-                  onTap: ()=>_showCountryDailog(),
-                  leading: Image.asset("assets/images/country.png",width: 30,height: 30,),
-                  title: Text(selectedCountryName,style: TextStyle(color: Colors.grey[600]),),
-                  trailing: Icon(Icons.keyboard_arrow_down),
-                ),
-                Divider(color: Colors.grey,),
-                ListTile(
-                  onTap: (){
-                    if(selectedCountryId!=null){
-                      _showCityDailog();
-                    }
-                    else{
-                      Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
-                    }
-                  },
-                  leading: Image.asset("assets/images/city.png",width: 30,height: 30,),
-                  title: Text(selectedCityName,style: TextStyle(color: Colors.grey[600]),),
-                  trailing: Icon(Icons.keyboard_arrow_down),
-                ),
-                Divider(color: Colors.grey,),
-                ListTile(
-                  onTap: (){
-                    if(selectedCountryId!=null && selectedCityId!=null){
-                      _showAreaDailog();
-                    }
-                    else{
-                      Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
-                    }
-                  },
-                  leading: Image.asset("assets/images/area.png",width: 30,height: 30,),
-                  title: Text(selectedAreaName,style: TextStyle(color: Colors.grey[600]),),
-                  trailing: Icon(Icons.keyboard_arrow_down),
-                ),
-                Divider(color: Colors.grey,),
-                ListTile(
-                  onTap: ()=>_showTypeDailog(),
-                  leading: Image.asset("assets/images/home.png",width: 30,height: 30,),
-                  title: Text(selectedTypeName,style: TextStyle(color: Colors.grey[600]),),
-                  trailing: Icon(Icons.keyboard_arrow_down),
-                ),
-                InkWell(
-                  onTap: (){
-                    if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (BuildContext context) => PropertyList(selectedCountryName,selectedCityName,selectedAreaName,selectedTypeName,isRent)));
-                    }
-                    else{
-                      Toast.show("Please fill the form", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
-                    }
-                  },
-                  child: Container(
-                    alignment: Alignment.center,
-                    height: 60,
-                    width: double.maxFinite,
-                    decoration: BoxDecoration(
-                        gradient: LinearGradient(
-                          begin: Alignment.topRight,
-                          end: Alignment.bottomLeft,
-                          stops: [
-                            0.4,
-                            0.6,
-                          ],
-                          colors: [
-                            Color(0xff307bd6),
-                            Color(0xff2895fa),
-                          ],
-                        )
-                    ),
-                    child: Text("Find Property",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontWeight: FontWeight.w600,fontSize: 20),),
-                  ),
-                )
-              ],
-            ),
           )
-        ],
-      )
-    );
-  }
-  Widget _slider(String image) {
-    return Container(
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: NetworkImage(image),
-          fit: BoxFit.cover
-        ),
-        borderRadius: BorderRadius.circular(15)
-      ),
+        )
+
     );
   }
 }

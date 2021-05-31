@@ -1,3 +1,4 @@
+import 'package:propertymarket/admin/admin_home.dart';
 import 'package:propertymarket/auth/register.dart';
 import 'package:propertymarket/components/form_error.dart';
 import 'package:propertymarket/screens/home.dart';
@@ -107,18 +108,20 @@ class _LoginState extends State<Login> {
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
                               try {
-                                UserCredential userCredential = await FirebaseAuth.instance.signInWithEmailAndPassword(
+                                await FirebaseAuth.instance.signInWithEmailAndPassword(
                                     email: email,
                                     password: password
                                 ).whenComplete(() {
-                                  FirebaseAuth.instance
-                                      .authStateChanges()
-                                      .listen((User user) {
+                                  FirebaseAuth.instance.authStateChanges().listen((User user) {
                                     if (user == null) {
                                       print('User is currently signed out!');
                                     } else {
                                       print('User is signed in!');
-                                      Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
+                                      if(user.uid=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
+                                        Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminHome()));
+                                      }
+                                      else
+                                        Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
 
                                     }
                                   });

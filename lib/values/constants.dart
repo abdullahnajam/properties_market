@@ -1,8 +1,8 @@
 import 'package:flutter/cupertino.dart';
 
-const primaryColor = Color(0xFFfdae3f);
+const primaryColor = Color(0xFF0247af);
 const backgroundColorLight = Color(0xFFfcdeb3);
-const oneSignalAppId="cd9c18d8-0cf2-4493-af75-bd8ef6f972ff";
+const oneSignalAppId="a20a24f1-42e9-4180-82b6-ec3cfb0aead4";
 const primaryColorDark = Color(0xFF2f3b47);
 final RegExp emailValidatorRegExp =
 RegExp(r"^[a-zA-Z0-9.]+@[a-zA-Z0-9]+\.[a-zA-Z]+");
@@ -14,3 +14,5 @@ const String kMatchPassError = "Passwords don't match";
 const String kNamelNullError = "Please Enter your name";
 const String kPhoneNumberNullError = "Please Enter your phone number";
 const String kAddressNullError = "Please Enter your address";
+
+

@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/data/img.dart';
 import 'package:propertymarket/data/my_colors.dart';
+import 'package:propertymarket/screens/favourites.dart';
 import 'package:propertymarket/widget/my_text.dart';
 
 class MenuDrawer extends StatefulWidget {
@@ -20,6 +21,102 @@ class MenuDrawerState extends State<MenuDrawer> {
     Navigator.pop(context);
   }
 
+  Future<void> _showInfoDailog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10.0),
+            ),
+          ),
+          insetAnimationDuration: const Duration(seconds: 1),
+          insetAnimationCurve: Curves.fastOutSlowIn,
+          elevation: 2,
+
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30)
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text("Contact Information",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                ),
+                ListTile(
+                  leading: Icon(Icons.phone),
+                  title: Text("Phone Number"),
+                ),
+                ListTile(
+                  leading: Icon(Icons.email_outlined),
+                  title: Text("Email"),
+                ),
+                SizedBox(
+                  height: 15,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Future<void> _showChangeLanguageDailog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: true, // user must tap button!
+      builder: (BuildContext context) {
+        return Dialog(
+          shape: RoundedRectangleBorder(
+            borderRadius: const BorderRadius.all(
+              Radius.circular(10.0),
+            ),
+          ),
+          insetAnimationDuration: const Duration(seconds: 1),
+          insetAnimationCurve: Curves.fastOutSlowIn,
+          elevation: 2,
+
+          child: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(30)
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text("Change Language",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                ),
+                ListTile(
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                  leading: Text(""),
+                  title: Text("Arabic"),
+                ),
+                ListTile(
+                  onTap: (){
+                    Navigator.pop(context);
+                  },
+                  leading: Text(""),
+                  title: Text("English"),
+                ),
+                SizedBox(
+                  height: 15,
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
 
 
 
@@ -33,13 +130,14 @@ class MenuDrawerState extends State<MenuDrawer> {
           SizedBox(height: 30,),
           Container(
             alignment: Alignment.center,
-            child: Image.asset("assets/images/logo.png",height: 150,),
+            child: Image.asset("assets/images/logo_english.jpeg",height: 150,),
           ),
-
-          InkWell(onTap: (){
-           /* Navigator.pushReplacement(context, new MaterialPageRoute(
-                  builder: (context) => Favourites()));*/
-          },
+          SizedBox(height: 30,),
+          InkWell(
+            onTap: (){
+            Navigator.pushReplacement(context, new MaterialPageRoute(
+                  builder: (context) => FavouriteList()));
+            },
             child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
                 children: <Widget>[
@@ -51,36 +149,38 @@ class MenuDrawerState extends State<MenuDrawer> {
             ),
           ),
           Container(height: 10),
+          InkWell(
+            onTap: (){
+              _showChangeLanguageDailog();
+            },
+            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.language, color: MyColors.grey_20, size: 20),
+                  Container(width: 20),
+                  Expanded(child: Text("Change Language", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                ],
+              ),
+            ),
+          ),
+          Container(height: 10),
           InkWell(onTap: (){
+            _showInfoDailog();
+          },
+            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.add, color: MyColors.grey_20, size: 20),
+                  Container(width: 20),
+                  Expanded(child: Text("Add Property", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                ],
+              ),
+            ),
+          ),
 
-          },
-            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.contact_mail_outlined, color: MyColors.grey_20, size: 20),
-                  Container(width: 20),
-                  Expanded(child: Text("Contact Us", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
-                ],
-              ),
-            ),
-          ),
           Container(height: 10),
-          InkWell(onTap: (){
-           /* Navigator.pushReplacement(context, new MaterialPageRoute(
-                builder: (context) => AboutUs()));*/
-          },
-            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
-              child: Row(
-                children: <Widget>[
-                  Icon(Icons.person_outline, color: MyColors.grey_20, size: 20),
-                  Container(width: 20),
-                  Expanded(child: Text("About Us", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
-                ],
-              ),
-            ),
-          ),
-          Container(height: 10),
-          InkWell(onTap: () async{
+          InkWell(
+            onTap: () async{
             await FirebaseAuth.instance.signOut().whenComplete((){
               Navigator.pushReplacement(
                   context, MaterialPageRoute(builder: (BuildContext context) => Login()));
@@ -96,41 +196,7 @@ class MenuDrawerState extends State<MenuDrawer> {
               ),
             ),
           ),
-          Container(
-            margin: EdgeInsets.all(20),
-            child: Text("Social Media",style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w600),),
-            
-          ),
-          Container(
-            height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: <Widget>[
-                Image.network("https://img.icons8.com/office/16/000000/instagram-new.png",width: 20,height: 20,),
-                Container(width: 20),
-                Expanded(child: Text("Instagram", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
-              ],
-            ),
-          ),
-          Container(
-            height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: <Widget>[
-                Image.network("https://img.icons8.com/officel/16/000000/youtube-play.png",width: 20,height: 20,),
-                Container(width: 20),
-                Expanded(child: Text("youtube", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
-              ],
-            ),
-          ),
-          Container(
-            height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
-            child: Row(
-              children: <Widget>[
-                Image.network("https://img.icons8.com/ultraviolet/40/000000/facebook-new.png",width: 20,height: 20,),
-                Container(width: 20),
-                Expanded(child: Text("facebook", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
-              ],
-            ),
-          ),
+
         ],
       ),
     );
