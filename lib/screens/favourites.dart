@@ -63,7 +63,13 @@ class _FavouriteListState extends State<FavouriteList> {
               DATA[individualKey]['measurementArea'].toString(),
               DATA[individualKey]['datePosted'],
               DATA[individualKey]['description'],
-              DATA[individualKey]['numericalPrice']
+              DATA[individualKey]['numericalPrice'],
+              DATA[individualKey]['payment'],
+              DATA[individualKey]['furnish'],
+            DATA[individualKey]['agentName'],
+            DATA[individualKey]['sponsered'],
+            DATA[individualKey]['floor'],
+            DATA[individualKey]['serial'],
           );
           list.add(property);
 
@@ -99,7 +105,13 @@ class _FavouriteListState extends State<FavouriteList> {
                 DATA[individualKey]['measurementArea'].toString(),
                 DATA[individualKey]['datePosted'],
                 DATA[individualKey]['description'],
-                DATA[individualKey]['numericalPrice']
+                DATA[individualKey]['numericalPrice'],
+                DATA[individualKey]['payment'],
+                DATA[individualKey]['furnish'],
+              DATA[individualKey]['agentName'],
+              DATA[individualKey]['sponsered'],
+              DATA[individualKey]['floor'],
+              DATA[individualKey]['serial'],
             );
             for(int i=0;i<key.length;i++){
               if(key[i]==individualKey)
@@ -124,8 +136,6 @@ class _FavouriteListState extends State<FavouriteList> {
 
     return Scaffold(
         backgroundColor: Colors.grey[200],
-        key: _drawerKey,
-        drawer: MenuDrawer(),
         body: SafeArea(
             child: Column(
               children: [
@@ -140,14 +150,6 @@ class _FavouriteListState extends State<FavouriteList> {
                   ),
                   child: Stack(
                     children: [
-                      GestureDetector(
-                        child: Container(
-                            margin: EdgeInsets.only(left: 15),
-                            alignment: Alignment.centerLeft,
-                            child: Icon(Icons.menu,color: primaryColor,)
-                        ),
-                        onTap: ()=>_openDrawer(),
-                      ),
                       Container(
                         alignment: Alignment.center,
                         child: Text("Favourites",style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),

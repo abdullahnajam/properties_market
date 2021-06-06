@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/data/img.dart';
 import 'package:propertymarket/data/my_colors.dart';
+import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/favourites.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/widget/my_text.dart';
@@ -133,7 +134,7 @@ class MenuDrawerState extends State<MenuDrawer> {
           InkWell(
             onTap: (){
               Navigator.pushReplacement(context, new MaterialPageRoute(
-                  builder: (context) => HomePage()));
+                  builder: (context) => BottomBar()));
             },
             child: Container(
               alignment: Alignment.center,

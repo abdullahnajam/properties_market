@@ -1,5 +1,6 @@
+import 'dart:convert';
 import 'dart:io';
-
+import 'package:http/http.dart' as http;
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
@@ -30,11 +31,17 @@ class _AddPropertyState extends State<AddProperty> {
   final areaController=TextEditingController();
   final typeController=TextEditingController();
   final descriptionController=TextEditingController();
+  final paymentController=TextEditingController();
+  final furnishController=TextEditingController();
+  final agentNameController=TextEditingController();
+  final floorController=TextEditingController();
+  final snoController=TextEditingController();
 
   String selectedCountryId="";
   String selectedCityId="";
   String selectedAreaId="";
   String selectedTypeId="";
+  bool isSponsered=false;
 
   Future<List<LocationModel>> getCountryList() async {
     List<LocationModel> list=new List();
@@ -450,12 +457,14 @@ class _AddPropertyState extends State<AddProperty> {
   }
 
   String photoUrl="";
+  final _formKey = GlobalKey<FormState>();
 
   submitData(){
     final databaseReference = FirebaseDatabase.instance.reference();
+    print("url item ${imageURLs.length}");
     databaseReference.child("property").push().set({
       'price': wordPriceController.text,
-      'numericalPrice': priceController.text,
+      'numericalPrice': int.parse(priceController.text),
       'beds': bedController.text,
       'bath': bathController.text,
       'call': phoneController.text,
@@ -464,15 +473,22 @@ class _AddPropertyState extends State<AddProperty> {
       'datePosted': DateTime.now().toString(),
       'description': descriptionController.text,
       'email': emailController.text,
-      'image': photoUrl,
+      'image': imageURLs,
       'location': "${areaController.text}, ${cityController.text}, ${countryController.text}",
       'measurementArea': areaSqrftController.text,
       'area': areaController.text,
       'typeOfProperty': typeController.text,
       'propertyCategory': isRent?"rent":"buy",
       'whatsapp': phoneController.text,
+      'payment': paymentController.text,
+      'furnish': furnishController.text,
+      'agentName': agentNameController.text,
+      'sponsered': isSponsered,
+      'floor': floorController.text,
+      'serial': snoController.text,
 
     }).then((value) {
+      sendNotification();
       Toast.show("Submitted", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
 
 
@@ -482,13 +498,45 @@ class _AddPropertyState extends State<AddProperty> {
     });
   }
 
+  sendNotification() async{
+    String url='https://fcm.googleapis.com/fcm/send';
+
+
+    await http.post(
+      'https://fcm.googleapis.com/fcm/send',
+      headers: <String, String>{
+        'Content-Type': 'application/json',
+        'Authorization': 'key=$serverToken',
+      },
+      body: jsonEncode(
+        <String, dynamic>{
+          'notification': <String, dynamic>{
+            'body': 'New Property Added',
+            'title': 'New property added from ${areaController.text}, ${cityController.text}, ${countryController.text} at ${priceController.text}'
+          },
+          'priority': 'high',
+          'data': <String, dynamic>{
+            'click_action': 'FLUTTER_NOTIFICATION_CLICK',
+            'id': '1',
+            'status': 'done'
+          },
+          'to': "/topics/user",
+        },
+      ),
+    );
+  }
+
+  List<File> imageFiles=[];
+  List<String> imageURLs=[];
   File imagefile;
   void fileSet(File file){
     setState(() {
       if(file!=null){
         imagefile=file;
+        imageFiles.add(file);
       }
     });
+    uploadImageToFirebase(context);
   }
   Future<File> _chooseGallery() async{
     await ImagePicker.pickImage(source: ImageSource.gallery).then((value) => fileSet(value));
@@ -538,6 +586,8 @@ class _AddPropertyState extends State<AddProperty> {
     taskSnapshot.ref.getDownloadURL().then(
           (value) {
             photoUrl=value;
+            imageURLs.add(value);
+            print("value $value");
           },
     );
   }
@@ -545,294 +595,532 @@ class _AddPropertyState extends State<AddProperty> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: ListView(
-        children: [
-          imagefile==null?
-          Container(
-            width: double.infinity,
-            height: 180,
-            color: Colors.grey[300],
-            alignment: Alignment.center,
-            child: GestureDetector(
-              onTap: (){
-                _showPicker(context);
-              },
-              child: Image.asset("assets/images/add.png",width: 50,height: 50,),
-            )
-          ):
-          GestureDetector(
-            onTap: ()=>_showPicker(context),
-            child: Container(
-              width: double.infinity,
-              height: 180,
-              decoration: BoxDecoration(
-                image: DecorationImage(
-                  image: FileImage(imagefile),
-                  fit: BoxFit.cover
-                )
-              ),
-            ),
-          ),
-          Table(
-            columnWidths: {0: FractionColumnWidth(.3), 1: FractionColumnWidth(.7)},
-            border: TableBorder.all(width: 0.5,color: Colors.grey),
-            children: [
-              TableRow(
+      body: Form(
+        key: _formKey,
+        child: ListView(
+          children: [
+            imageFiles.length>0?
+            Container(
+                width: double.infinity,
+                height: 200,
+                color: Colors.grey[300],
+                alignment: Alignment.topCenter,
+                child: Column(
                   children: [
+                    SizedBox(height: 20,),
+                    Container(
+                      child: GestureDetector(
+                        onTap: (){
+                          _showPicker(context);
+                        },
+                        child: Image.asset("assets/images/add.png",width: 50,height: 50,),
+                      ),
+                    ),
+                    SizedBox(height: 20,),
+                    Container(
+                      margin: EdgeInsets.all(10),
+                      height: 50,
+                      child: ListView.builder(
+                        scrollDirection: Axis.horizontal,
+                        itemCount: imageFiles.length,
+                        itemBuilder: (BuildContext context,int index){
+                          return GestureDetector(
+                            onTap: (){
+                              /*setState(() {
+                                imageFiles.removeAt(index);
+                                imageURLs.removeAt(index);
+                              });*/
+                            },
+                            child: Container(
+                              height: 50,
+                              width: 50,
+                              margin: EdgeInsets.only(right: 10),
+                              decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(10),
+                                  image: DecorationImage(
+                                    image: FileImage(imageFiles[index]),
+                                    fit: BoxFit.cover,
+                                  )
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    )
+                  ],
+                )
+            ):
                 Container(
-                  child: Text('Price',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                  padding: EdgeInsets.all(10),
-                  margin: EdgeInsets.only(top: 5),
-                ),
-                Container(
-                  child: TextField(
-                    maxLines: 1,
-                    controller: wordPriceController,
-                    decoration: InputDecoration(hintText:"Price in words",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                  width: double.infinity,
+                  height: 200,
+                  color: Colors.grey[300],
+                  child: GestureDetector(
+                    onTap: (){
+                      _showPicker(context);
+                    },
+                    child: Image.asset("assets/images/add.png",width: 50,height: 50,),
                   ),
                 ),
-              ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Price',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        controller:priceController,
-                        keyboardType: TextInputType.number,
-                        maxLines: 1,
-                        decoration: InputDecoration(hintText:"Price in Digits",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                      ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Beds',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        keyboardType: TextInputType.number,
-                        maxLines: 1,
-                        controller: bedController,
-                        decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                      ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Baths',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: bathController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                      ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Area',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: areaSqrftController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(hintText:"In square feet",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                      ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Description',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 3,
-                        controller: descriptionController,
-                        decoration: InputDecoration(hintText:"Property Description",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                      ),
-                    ),
-                  ]),
 
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Phone Number',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: phoneController,
-                        keyboardType: TextInputType.phone,
-                        decoration: InputDecoration(hintText:"Enter Phone Number",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+            Table(
+              columnWidths: {0: FractionColumnWidth(.3), 1: FractionColumnWidth(.7)},
+              border: TableBorder.all(width: 0.5,color: Colors.grey),
+              children: [
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Name',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
                       ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Email',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: emailController,
-                        decoration: InputDecoration(hintText:"Enter Email",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                      Container(
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          maxLines: 1,
+                          controller: wordPriceController,
+                          decoration: InputDecoration(hintText:"Enter Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
                       ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Country',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: countryController,
-                        readOnly: true,
-                        onTap: (){
-                          _showCountryDailog();
-                        },
-                        decoration: InputDecoration(hintText:"Enter Country",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Price',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
                       ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('City',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: cityController,
-                        readOnly: true,
-                        onTap: (){
-                          _showCityDailog();
-                        },
-                        decoration: InputDecoration(hintText:"Enter City",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                      Container(
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller:priceController,
+                          keyboardType: TextInputType.number,
+                          maxLines: 1,
+                          decoration: InputDecoration(hintText:"Price (Number only)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
                       ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Area',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        controller: areaController,
-                        readOnly: true,
-                        onTap: (){
-                          _showAreaDailog();
-                        },
-                        decoration: InputDecoration(hintText:"Enter Area",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Serial Number',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
                       ),
-                    ),
-                  ]),
-              TableRow(
-                  children: [
-                    Container(
-                      child: Text('Property Type',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
-                      padding: EdgeInsets.all(10),
-                      margin: EdgeInsets.only(top: 5),
-                    ),
-                    Container(
-                      child: TextField(
-                        maxLines: 1,
-                        readOnly: true,
-                        controller: typeController,
-                        onTap: (){
-                          _showTypeDailog();
-                        },
-                        decoration: InputDecoration(hintText:"Enter Property Type",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                      Container(
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller:snoController,
+                          maxLines: 1,
+                          decoration: InputDecoration(hintText:"Enter Serial Number",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
                       ),
-                    ),
-                  ]),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Beds',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          keyboardType: TextInputType.number,
+                          maxLines: 1,
+                          controller: bedController,
+                          decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Baths',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: bathController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Area',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: areaSqrftController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(hintText:"In meters",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Floors',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: floorController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+
+                        child: Text('Description',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 3,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: descriptionController,
+                          decoration: InputDecoration(hintText:"Property Description",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Phone Number',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: phoneController,
+                          keyboardType: TextInputType.phone,
+                          decoration: InputDecoration(hintText:"Enter Phone Number",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Email',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: emailController,
+                          decoration: InputDecoration(hintText:"Enter Email",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Agent Name',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: agentNameController,
+
+                          decoration: InputDecoration(hintText:"Enter Agent Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Country',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: countryController,
+                          readOnly: true,
+                          onTap: (){
+                            _showCountryDailog();
+                          },
+                          decoration: InputDecoration(hintText:"Enter Country",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('City',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: cityController,
+                          readOnly: true,
+                          onTap: (){
+                            _showCityDailog();
+                          },
+                          decoration: InputDecoration(hintText:"Enter City",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Area',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: areaController,
+                          readOnly: true,
+                          onTap: (){
+                            _showAreaDailog();
+                          },
+                          decoration: InputDecoration(hintText:"Enter Area",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Property Type',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          readOnly: true,
+                          controller: typeController,
+                          onTap: (){
+                            _showTypeDailog();
+                          },
+                          decoration: InputDecoration(hintText:"Enter Property Type",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Payment Type',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: paymentController,
+
+                          decoration: InputDecoration(hintText:"Enter Payment Type",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
+                TableRow(
+                    children: [
+                      Container(
+                        child: Text('Furnishing',textAlign: TextAlign.center,style: TextStyle(color: Colors.grey[600],fontWeight: FontWeight.w600),),
+                        padding: EdgeInsets.all(10),
+                        margin: EdgeInsets.only(top: 5),
+                      ),
+                      Container(
+                        child: TextFormField(
+                          maxLines: 1,
+                          validator: (value) {
+                            if (value == null || value.isEmpty) {
+                              return 'Please enter some text';
+                            }
+                            return null;
+                          },
+                          controller: furnishController,
+
+                          decoration: InputDecoration(hintText:"Enter Furnish details",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                        ),
+                      ),
+                    ]),
 
 
 
 
-            ],
-          ),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              new Radio(
-                value: rentOrBuy.rent,
-                groupValue: _rentOrBuy,
-                onChanged: (rentOrBuy value) {
-                  setState(() {
-                    isRent = true;
-                    _rentOrBuy = value;
-                  });
-                },
-              ),
-              new Text(
-                'Rent',
-                style: new TextStyle(fontSize: 16.0),
-              ),
-              new Radio(
-                value: rentOrBuy.buy,
-                groupValue: _rentOrBuy,
-                onChanged: (rentOrBuy value) {
-                  setState(() {
-                    isRent = false;
-                    _rentOrBuy = value;
-                  });
-                },
-              ),
-              new Text(
-                'Buy',
-                style: new TextStyle(
-                  fontSize: 16.0,
-                ),
-              ),
-            ],
-          ),
-          Container(
-            margin: EdgeInsets.all(10),
-            child: RaisedButton(
-              onPressed: (){
-                submitData();
-
-              },
-              color: primaryColor,
-              child: Text("Add Property",style: TextStyle(color: Colors.white),),
+              ],
             ),
-          )
-        ],
-      ),
+
+            CheckboxListTile(
+                title: Text("Sponsered Property"),
+                value: isSponsered,
+                activeColor: primaryColor,
+                onChanged: (bool value){
+                  setState(() {
+                    isSponsered=value;
+
+                  });
+                }
+            ),
+
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                new Radio(
+                  value: rentOrBuy.rent,
+                  groupValue: _rentOrBuy,
+                  onChanged: (rentOrBuy value) {
+                    setState(() {
+                      isRent = true;
+                      _rentOrBuy = value;
+                    });
+                  },
+                ),
+                new Text(
+                  'Rent',
+                  style: new TextStyle(fontSize: 16.0),
+                ),
+                new Radio(
+                  value: rentOrBuy.buy,
+                  groupValue: _rentOrBuy,
+                  onChanged: (rentOrBuy value) {
+                    setState(() {
+                      isRent = false;
+                      _rentOrBuy = value;
+                    });
+                  },
+                ),
+                new Text(
+                  'Buy',
+                  style: new TextStyle(
+                    fontSize: 16.0,
+                  ),
+                ),
+              ],
+            ),
+            Container(
+              margin: EdgeInsets.all(10),
+              child: RaisedButton(
+                onPressed: (){
+                  if (_formKey.currentState.validate()) {
+                    submitData();
+                  }
+
+
+                },
+                color: primaryColor,
+                child: Text("Add Property",style: TextStyle(color: Colors.white),),
+              ),
+            )
+          ],
+        ),
+      )
     );
   }
 }

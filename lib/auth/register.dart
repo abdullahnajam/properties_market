@@ -1,7 +1,10 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/components/form_error.dart';
+import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:page_transition/page_transition.dart';
@@ -110,7 +113,20 @@ class _RegisterState extends State<Register> {
                                       print('User is currently signed out!');
                                     } else {
                                       print('User is signed in!');
-                                      Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
+                                      final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+                                      _firebaseMessaging.subscribeToTopic('user');
+                                      _firebaseMessaging.getToken().then((value) {
+
+                                        print(value);
+                                        User user=FirebaseAuth.instance.currentUser;
+                                        final databaseReference = FirebaseDatabase.instance.reference();
+                                        databaseReference.child("userData").child(user.uid).set({
+                                          'token':value,
+                                          'email': user.email
+                                        }).then((value) => Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: BottomBar())));
+
+                                      });
+
                                     }
                                   });
                                 });

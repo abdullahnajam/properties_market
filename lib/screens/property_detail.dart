@@ -3,9 +3,12 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 class PropertyDetail extends StatefulWidget {
   Property _property;
 
@@ -19,12 +22,16 @@ class _PropertyDetailState extends State<PropertyDetail> {
   IconData _iconData=Icons.favorite_border;
   Color _color=Colors.white;
   bool isFavourite = false;
+  List<Widget> slideShowWidget=[];
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     checkFavouriteFromDatabase();
+    for(int i=0;i<widget._property.image.length;i++){
+      slideShowWidget.add(_slider(widget._property.image[i]));
+    }
 
   }
 
@@ -95,30 +102,37 @@ class _PropertyDetailState extends State<PropertyDetail> {
               children: [
                 Container(
                   height: 250,
-                  width: double.infinity,
-                  decoration: BoxDecoration(
-                    color: Colors.grey[300],
-                    image: DecorationImage(
-                        image: NetworkImage(widget._property.image),
-                        fit: BoxFit.cover
-                    ),
+                  child: ImageSlideshow(
 
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        margin: EdgeInsets.only(left: 10,right: 10),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text('propertyDetails'.tr(),style: TextStyle(color: Colors.white,fontSize: 18,fontWeight: FontWeight.w600),),
-                            IconButton(icon: Icon(_iconData,color: _color), onPressed: checkFavourite),
-                          ],
-                        ),
-                      )
-                    ],
+                    /// Width of the [ImageSlideshow].
+                    width: double.infinity,
+
+
+                    /// The page to show when first creating the [ImageSlideshow].
+                    initialPage: 0,
+
+                    /// The color to paint the indicator.
+                    indicatorColor: Colors.blue,
+
+                    /// The color to paint behind th indicator.
+                    indicatorBackgroundColor: Colors.white,
+
+
+                    /// The widgets to display in the [ImageSlideshow].
+                    /// Add the sample image file into the images folder
+                    children: slideShowWidget,
+
+                    /// Called whenever the page in the center of the viewport changes.
+                    onPageChanged: (value) {
+                      print('Page changed: $value');
+                    },
+
+                    /// Auto scroll interval.
+                    /// Do not auto scroll with null or 0.
+                    autoPlayInterval: 10000,
                   ),
                 ),
+
                 Container(
                   height: 50,
                   alignment: Alignment.center,
@@ -148,7 +162,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                       children: [
                         Image.asset("assets/images/square.png",width: 20,height: 20,),
                         SizedBox(width: 5,),
-                        Text("${widget._property.measurementArea} Sq. ft."),
+                        Text("${widget._property.measurementArea} m"),
                       ],
                     ),
 
@@ -207,12 +221,61 @@ class _PropertyDetailState extends State<PropertyDetail> {
                             ),
                             Expanded(
                               flex: 2,
-                              child: Text(widget._property.price,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
+                              child: Text(widget._property.numericalPrice.toString(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
                             ),
 
                           ],
                         ),
                       ),
+                      Container(
+                        padding:EdgeInsets.only(top: 3,bottom: 3) ,
+                        color: Colors.grey[200],
+                        child: Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.money),
+                                  SizedBox(width: 10,),
+                                  Text('payment'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(widget._property.payment,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
+                            ),
+
+                          ],
+                        ),
+                      ),
+                      Container(
+                        padding:EdgeInsets.only(top: 3,bottom: 3) ,
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.all_out),
+                                  SizedBox(width: 10,),
+                                  Text('furnish'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(widget._property.furnish,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
+                            ),
+
+                          ],
+                        ),
+                      ),
+
                       Container(
                         padding:EdgeInsets.only(top: 3,bottom: 3) ,
                         color: Colors.grey[200],
@@ -285,6 +348,30 @@ class _PropertyDetailState extends State<PropertyDetail> {
                           ],
                         ),
                       ),
+                      Container(
+                        padding:EdgeInsets.only(top: 3,bottom: 3) ,
+                        color: Colors.white,
+                        child: Row(
+                          children: [
+                            SizedBox(width: 10,),
+                            Expanded(
+                              flex: 3,
+                              child: Row(
+                                children: [
+                                  Icon(Icons.monetization_on_outlined),
+                                  SizedBox(width: 10,),
+                                  Text('floor'.tr(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w300),),
+                                ],
+                              ),
+                            ),
+                            Expanded(
+                              flex: 2,
+                              child: Text(widget._property.floor.toString(),style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
+                            ),
+
+                          ],
+                        ),
+                      ),
                     ],
                   ),
                 ),
@@ -304,6 +391,14 @@ class _PropertyDetailState extends State<PropertyDetail> {
                   margin: EdgeInsets.all(10),
                   child: Text(widget._property.description,style: TextStyle(color: Colors.grey,fontSize: 15),),
                 ),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text('Agent'.tr(),style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
+                ),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: Text(widget._property.agentName,style: TextStyle(color: Colors.grey,fontSize: 15),),
+                ),
                 SizedBox(height: 50,),
               ],
             ),
@@ -317,6 +412,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
                   InkWell(
+                    onTap:()=>launch("tel://${widget._property.whatsapp}"),
                     child: Container(
                       padding: EdgeInsets.only(left: 10,right: 10,top: 7,bottom: 7),
                       decoration: BoxDecoration(
@@ -333,6 +429,17 @@ class _PropertyDetailState extends State<PropertyDetail> {
                     ),
                   ),
                   InkWell(
+                    onTap: (){
+                      final Uri _emailLaunchUri = Uri(
+                          scheme: 'mailto',
+                          host: widget._property.email,
+                          path: widget._property.email,
+                          queryParameters: {
+                            'subject': 'Hi there, I am looking to list a property'
+                          }
+                      );
+                      launch(_emailLaunchUri.toString());
+                    },
                     child: Container(
                       padding: EdgeInsets.only(left: 10,right: 10,top: 7,bottom: 7),
                       decoration: BoxDecoration(
@@ -349,6 +456,9 @@ class _PropertyDetailState extends State<PropertyDetail> {
                     ),
                   ),
                   InkWell(
+                    onTap: (){
+                      FlutterOpenWhatsapp.sendSingleMessage(widget._property.whatsapp, "Hi there, I am looking to list a property");
+                    },
                     child: Container(
                       padding: EdgeInsets.only(left: 10,right: 10,top: 7,bottom: 7),
                       decoration: BoxDecoration(
@@ -370,6 +480,17 @@ class _PropertyDetailState extends State<PropertyDetail> {
           )
         ],
       )
+    );
+  }
+  Widget _slider(String image) {
+    return Container(
+      decoration: BoxDecoration(
+          image: DecorationImage(
+              image: NetworkImage(image),
+              fit: BoxFit.cover
+          ),
+          borderRadius: BorderRadius.circular(15)
+      ),
     );
   }
 }

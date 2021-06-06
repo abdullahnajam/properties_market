@@ -55,7 +55,7 @@ class _AdminPropertyDetailState extends State<AdminPropertyDetail> {
                       decoration: BoxDecoration(
                         color: Colors.grey[300],
                         image: DecorationImage(
-                            image: NetworkImage(widget._property.image),
+                            image: NetworkImage(widget._property.image[0]),
                             fit: BoxFit.cover
                         ),
 

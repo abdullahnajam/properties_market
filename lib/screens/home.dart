@@ -1,13 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:overlay_support/overlay_support.dart';
 import 'package:propertymarket/model/location.dart';
 import 'package:propertymarket/model/slideshow.dart';
 import 'package:propertymarket/navigator/menu_drawer.dart';
 import 'package:propertymarket/screens/property_list.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:propertymarket/values/shared_prefs.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:toast/toast.dart';
 import 'package:easy_localization/easy_localization.dart';
 
@@ -18,6 +22,58 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
+
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  String _message = '';
+
+
+
+  void getMessage() {
+    _firebaseMessaging.configure(
+        onMessage: (Map<String, dynamic> message) async {
+          print('received message');
+          setState(() => _message = message["notification"]["body"]);
+          showOverlayNotification((context) {
+            return Card(
+              margin: EdgeInsets.all(10),
+              child: SafeArea(
+                child: ListTile(
+                  title: Text(message['notification']['title']),
+                  subtitle: Text(message['notification']['body']),
+                  trailing: IconButton(
+                      icon: Icon(Icons.close),
+                      onPressed: () {
+                        OverlaySupportEntry.of(context).dismiss();
+                      }),
+                ),
+              ),
+            );
+          }, duration: Duration(milliseconds: 4000));
+        }, onResume: (Map<String, dynamic> message) async {
+      print('on resume $message');
+      setState(() => _message = message["notification"]["body"]);
+    }, onLaunch: (Map<String, dynamic> message) async {
+      print('on launch $message');
+      setState(() => _message = message["notification"]["body"]);
+    });
+  }
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    getMessage();
+    SharedPref sharedPref=new SharedPref();
+    sharedPref.getPref().then((value) {
+      print("value $value");
+      if(!value){
+        getSlideShow("ar");
+      }
+      else{
+        getSlideShow("en");
+      }
+    });
+
+  }
 
 
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
@@ -452,9 +508,13 @@ class _HomePageState extends State<HomePage> {
 
   rentOrBuy _rentOrBuy = rentOrBuy.rent;
   bool isRent=true;
-  Future<List<Widget>> getSlideShow() async{
+
+
+  List<Widget> slideShowWidget=[];
+  getSlideShow(String language) async{
+
     List<SlideShow> slideShowList=[];
-    List<Widget> slideShowWidget=[];
+
     final databaseReference = FirebaseDatabase.instance.reference();
     await databaseReference.child("slideshow").once().then((DataSnapshot dataSnapshot){
 
@@ -466,9 +526,16 @@ class _HomePageState extends State<HomePage> {
           SlideShow slideShow = new SlideShow(
             individualKey,
             DATA[individualKey]['image'],
+            DATA[individualKey]['language'],
           );
-          slideShowList.add(slideShow);
-          slideShowWidget.add(_slider(slideShow.image));
+          print("compare ${slideShow.language} vs $language");
+          if(slideShow.language==language){
+            print("compared ${slideShow.language} vs $language");
+            setState(() {
+              slideShowList.add(slideShow);
+              slideShowWidget.add(_slider(slideShow.image));
+            });
+          }
 
 
         }
@@ -476,18 +543,20 @@ class _HomePageState extends State<HomePage> {
     });
     return slideShowWidget;
   }
+
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: Color(0xfff2f8fc),
-      key: _drawerKey,
-      drawer: MenuDrawer(),
-      body: Column(
+      body: ListView(
         children: [
           Stack(
             children: [
-              Container(
-                padding: EdgeInsets.only(top: 40,left: 10,right: 10),
+              AnimatedContainer(
+                duration: const Duration(seconds: 2),
+                curve: Curves.fastOutSlowIn,
+                padding: EdgeInsets.only(top: 10,left: 10,right: 10),
                 decoration: BoxDecoration(
                     color: primaryColor,
                     borderRadius: BorderRadius.only(
@@ -495,101 +564,55 @@ class _HomePageState extends State<HomePage> {
                         bottomRight: Radius.circular(20)
                     )
                 ),
-                height: MediaQuery.of(context).size.height*0.35,
+                width: MediaQuery.of(context).size.width,
+                height: slideShowWidget.length==0?MediaQuery.of(context).size.height*0.1:MediaQuery.of(context).size.height*0.33,
                 child: Column(
                   children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
+                    Container(
 
-                        Container(
-                          child: Text('title'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
-                        ),
-                        InkWell(
-                          onTap: (){
-                            _openDrawer();
-                          },
-                          child: Icon(Icons.menu,color: Colors.white,size: 25,),
-                        ),
-                      ],
+                      child: Text('title'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
                     ),
-                    Align(
-                        alignment: Alignment.center,
-                        child: Column(
-                          children: [
-                            SizedBox(height: 10,),
-                            Text('slogan1'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
-                            SizedBox(height: 2,),
-                            Text('slogan2'.tr(),style: TextStyle(color: Colors.white,fontSize: 25,fontWeight: FontWeight.w700),),
-                          ],
-                        )
-                    )
-
                   ],
                 ),
               ),
-              Container(
-                height: 150,
+              slideShowWidget.length>0?Container(
+                height: MediaQuery.of(context).size.height*0.24,
 
                 margin: EdgeInsets.only(
-                  top: MediaQuery.of(context).size.height*0.23,
+                  top: MediaQuery.of(context).size.height*0.07,
                   left: MediaQuery.of(context).size.width*0.07,
                   right: MediaQuery.of(context).size.width*0.07,
                 ),
-                child: FutureBuilder<List<Widget>>(
-                  future: getSlideShow(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return ImageSlideshow(
+                child: ImageSlideshow(
 
-                          /// Width of the [ImageSlideshow].
-                          width: double.infinity,
+                  /// Width of the [ImageSlideshow].
+                  width: double.infinity,
 
 
-                          /// The page to show when first creating the [ImageSlideshow].
-                          initialPage: 0,
+                  /// The page to show when first creating the [ImageSlideshow].
+                  initialPage: 0,
 
-                          /// The color to paint the indicator.
-                          indicatorColor: Colors.blue,
+                  /// The color to paint the indicator.
+                  indicatorColor: Colors.blue,
 
-                          /// The color to paint behind th indicator.
-                          indicatorBackgroundColor: Colors.white,
+                  /// The color to paint behind th indicator.
+                  indicatorBackgroundColor: Colors.white,
 
 
-                          /// The widgets to display in the [ImageSlideshow].
-                          /// Add the sample image file into the images folder
-                          children: snapshot.data,
+                  /// The widgets to display in the [ImageSlideshow].
+                  /// Add the sample image file into the images folder
+                  children: slideShowWidget,
 
-                          /// Called whenever the page in the center of the viewport changes.
-                          onPageChanged: (value) {
-                            print('Page changed: $value');
-                          },
-
-                          /// Auto scroll interval.
-                          /// Do not auto scroll with null or 0.
-                          autoPlayInterval: 10000,
-                        );
-                      }
-                      else {
-                        return new Center(
-                          child: Container(
-                              margin: EdgeInsets.only(top: 10),
-
-                          ),
-                        );
-                      }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
+                  /// Called whenever the page in the center of the viewport changes.
+                  onPageChanged: (value) {
+                    print('Page changed: $value');
                   },
-                ),
-              )
+
+                  /// Auto scroll interval.
+                  /// Do not auto scroll with null or 0.
+                  autoPlayInterval: 10000,
+                )
+              ):Container()
             ],
           ),
           Container(
@@ -647,7 +670,7 @@ class _HomePageState extends State<HomePage> {
                       _showCityDailog();
                     }
                     else{
-                      Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                      //Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                     }
                   },
                   leading: Image.asset("assets/images/city.png",width: 30,height: 30,),
@@ -661,7 +684,7 @@ class _HomePageState extends State<HomePage> {
                       _showAreaDailog();
                     }
                     else{
-                      Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                      //Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                     }
                   },
                   leading: Image.asset("assets/images/area.png",width: 30,height: 30,),
@@ -682,7 +705,7 @@ class _HomePageState extends State<HomePage> {
                           MaterialPageRoute(builder: (BuildContext context) => PropertyList(selectedCountryName,selectedCityName,selectedAreaName,selectedTypeName,isRent)));
                     }
                     else{
-                      Toast.show("Please fill the form", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                      //Toast.show("Please fill the form", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                     }
                   },
                   child: Container(

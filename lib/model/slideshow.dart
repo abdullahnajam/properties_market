@@ -1,5 +1,5 @@
 class SlideShow{
-  String id,image;
+  String id,image,language;
 
-  SlideShow(this.id, this.image);
+  SlideShow(this.id, this.image,this.language);
 }

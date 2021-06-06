@@ -1,8 +1,11 @@
 import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_open_whatsapp/flutter_open_whatsapp.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:url_launcher/url_launcher.dart';
+import 'package:easy_localization/easy_localization.dart';
 class PropertyTile extends StatefulWidget {
   Property property;
 
@@ -13,6 +16,8 @@ class PropertyTile extends StatefulWidget {
 }
 
 class _PropertyTileState extends State<PropertyTile> {
+
+
 
 
   static String timeAgoSinceDate(String dateString, {bool numericDates = true}) {
@@ -54,6 +59,7 @@ class _PropertyTileState extends State<PropertyTile> {
   @override
   Widget build(BuildContext context) {
     return Container(
+      margin: EdgeInsets.only(bottom: 10),
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(10),
@@ -62,13 +68,16 @@ class _PropertyTileState extends State<PropertyTile> {
         children: [
           Expanded(
             flex: 3,
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(10),
-              child: CachedNetworkImage(
-                imageUrl: widget.property.image,
-                fit: BoxFit.cover,
-                placeholder: (context, url) => Center(child: CircularProgressIndicator(),),
-                errorWidget: (context, url, error) => Icon(Icons.error),
+            child: Container(
+              height: 100,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(10),
+                child: CachedNetworkImage(
+                  imageUrl: widget.property.image[0],
+                  fit: BoxFit.cover,
+                  placeholder: (context, url) => Center(child: CircularProgressIndicator(),),
+                  errorWidget: (context, url, error) => Icon(Icons.error),
+                ),
               ),
             )
           ),
@@ -81,11 +90,18 @@ class _PropertyTileState extends State<PropertyTile> {
                 children: [
                   Text(timeAgoSinceDate(widget.property.datePosted),style: TextStyle(fontSize: 10,fontWeight: FontWeight.w300),),
                   SizedBox(height: 10,),
+                  widget.property.sponsered?Row(
+                    children: [
+                      Image.asset("assets/images/sponsor.png",width: 20,height: 20,),
+                      SizedBox(width: 10,),
+                      Text("Sponsored",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
+                    ],
+                  ):Container(),
                   Text(widget.property.price,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18,color: Colors.black),),
                   SizedBox(height: 5,),
                   Text(widget.property.location,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15,color: Colors.black),),
                   SizedBox(height: 5,),
-                  Text("Flat for ${widget.property.propertyCategory}",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
+                  Text("${'flat'.tr()} ${widget.property.propertyCategory}",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
                   SizedBox(height: 7,),
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -102,7 +118,7 @@ class _PropertyTileState extends State<PropertyTile> {
                           SizedBox(width: 5,),
                           Image.asset("assets/images/square.png",width: 15,height: 15,),
                           SizedBox(width: 5,),
-                          Text("${widget.property.measurementArea} Sq. ft."),
+                          Text("${widget.property.measurementArea} m"),
                         ],
                       ),
                     ],
@@ -111,31 +127,57 @@ class _PropertyTileState extends State<PropertyTile> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                     children: [
-                      Container(
-                        padding: EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(10),
+                      InkWell(
+                        child: Container(
+                          padding: EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text("Email",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
                         ),
-                        child: Text("Email",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
+                        onTap: (){
+
+                          final Uri _emailLaunchUri = Uri(
+                              scheme: 'mailto',
+                              path: widget.property.email,
+                              queryParameters: {
+                                'subject': 'Hi there, I am looking to list a property'
+                              }
+                          );
+                          launch(_emailLaunchUri.toString());
+
+                        },
+                      ),
+                      InkWell(
+                        onTap: (){
+                          FlutterOpenWhatsapp.sendSingleMessage(widget.property.whatsapp, "Hi there, I am looking to list a property");
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text("Whatsapp",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
+                        ),
+                      ),
+                      InkWell(
+                        onTap: (){
+                          launch("tel://${widget.property.whatsapp}");
+                        },
+                        child: Container(
+                          padding: EdgeInsets.all(7),
+                          decoration: BoxDecoration(
+                            color: primaryColor,
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          child: Text("Call",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
+                        ),
                       ),
 
-                      Container(
-                        padding: EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text("Whatsapp",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
-                      ),
-                      Container(
-                        padding: EdgeInsets.all(7),
-                        decoration: BoxDecoration(
-                          color: primaryColor,
-                          borderRadius: BorderRadius.circular(10),
-                        ),
-                        child: Text("Call",style: TextStyle(fontWeight: FontWeight.w400,fontSize: 15,color: Colors.white),),
-                      ),
+
+
                     ],
                   )
 

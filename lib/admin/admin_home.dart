@@ -77,7 +77,13 @@ class _AdminHomeState extends State<AdminHome> {
               DATA[individualKey]['measurementArea'].toString(),
               DATA[individualKey]['datePosted'],
               DATA[individualKey]['description'],
-              DATA[individualKey]['numericalPrice']
+              DATA[individualKey]['numericalPrice'],
+              DATA[individualKey]['payment'],
+              DATA[individualKey]['furnish'],
+            DATA[individualKey]['agentName'],
+            DATA[individualKey]['sponsered'],
+            DATA[individualKey]['floor'],
+            DATA[individualKey]['serial'],
           );
           list.add(property);
 
@@ -93,13 +99,14 @@ class _AdminHomeState extends State<AdminHome> {
   }
   @override
   Widget build(BuildContext context) {
+    context.locale = Locale('en', 'US');
     return Scaffold(
         backgroundColor: Colors.grey[200],
         key: _drawerKey,
         floatingActionButton: FloatingActionButton(
           child: Icon(Icons.add),
           onPressed: (){
-            Navigator.pushReplacement(
+            Navigator.push(
                 context, MaterialPageRoute(builder: (BuildContext context) => AddProperty()));
           },
         ),
@@ -160,7 +167,7 @@ class _AdminHomeState extends State<AdminHome> {
                                           child: ClipRRect(
                                             borderRadius: BorderRadius.circular(10),
                                             child: CachedNetworkImage(
-                                              imageUrl: snapshot.data[index].image,
+                                              imageUrl: snapshot.data[index].image[0],
                                               fit: BoxFit.cover,
                                               placeholder: (context, url) => Center(child: CircularProgressIndicator(),),
                                               errorWidget: (context, url, error) => Icon(Icons.error),
@@ -181,6 +188,8 @@ class _AdminHomeState extends State<AdminHome> {
                                                 Text(snapshot.data[index].location,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15,color: Colors.black),),
                                                 SizedBox(height: 5,),
                                                 Text("Flat for ${snapshot.data[index].propertyCategory}",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
+                                                SizedBox(height: 5,),
+                                                Text("Serial Number # ${snapshot.data[index].serial}",style: TextStyle(fontSize: 12,fontWeight: FontWeight.w300),),
                                                 SizedBox(height: 7,),
                                                 Row(
                                                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -246,6 +255,6 @@ class _AdminHomeState extends State<AdminHome> {
   @override
   void initState() {
     super.initState();
-    context.locale = Locale('en', 'US');
+
   }
 }

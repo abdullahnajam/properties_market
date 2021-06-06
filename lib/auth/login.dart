@@ -1,6 +1,7 @@
 import 'package:propertymarket/admin/admin_home.dart';
 import 'package:propertymarket/auth/register.dart';
 import 'package:propertymarket/components/form_error.dart';
+import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -121,7 +122,7 @@ class _LoginState extends State<Login> {
                                         Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminHome()));
                                       }
                                       else
-                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: HomePage()));
+                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: BottomBar()));
 
                                     }
                                   });

@@ -33,5 +33,11 @@
   "LowToHigh": "Prices Low to High",
   "HighToLow": "Prices High to Low",
   "icon": "assets/images/logo_english.jpeg",
-  "noData": "No Data Found"
+  "noData": "No Data Found",
+  "payment": "Payment Type",
+  "furnish":"Furnishing",
+  "floor":"Floor",
+  "news":"News",
+  "agent":"Agent",
+  "flat" : "Flat for"
 }

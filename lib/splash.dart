@@ -3,6 +3,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/admin/admin_home.dart';
 import 'package:propertymarket/auth/login.dart';
+import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
 
@@ -37,14 +38,13 @@ class _SplashScreenState extends State<SplashScreen> {
   void navigationPage() {
     FirebaseAuth.instance.authStateChanges().listen((User user) {
       if (user == null) {
-        Navigator.pushReplacement(context,
-            MaterialPageRoute(builder: (BuildContext context) => Login()));
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BottomBar()));
       } else {
-        if(user=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
+        if(user.uid=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
         }
         else
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => HomePage()));
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BottomBar()));
 
       }
     });

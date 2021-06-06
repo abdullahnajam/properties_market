@@ -197,7 +197,6 @@ class _PropertyListState extends State<PropertyList> {
       },
     );
   }
-
   Future<void> _showCityDailog() async {
     return showDialog<void>(
       context: context,
@@ -279,7 +278,6 @@ class _PropertyListState extends State<PropertyList> {
       },
     );
   }
-
   Future<void> _showAreaDailog() async {
     return showDialog<void>(
       context: context,
@@ -361,7 +359,6 @@ class _PropertyListState extends State<PropertyList> {
       },
     );
   }
-
   Future<void> _showTypeDailog() async {
     return showDialog<void>(
       context: context,
@@ -461,6 +458,7 @@ class _PropertyListState extends State<PropertyList> {
     _drawerKey.currentState.openDrawer();
   }
   List<Property> list=[];
+  List<Property> sponsor=[];
   getPropertyList() async {
 
     final databaseReference = FirebaseDatabase.instance.reference();
@@ -488,23 +486,43 @@ class _PropertyListState extends State<PropertyList> {
               DATA[individualKey]['measurementArea'].toString(),
               DATA[individualKey]['datePosted'],
               DATA[individualKey]['description'],
-              DATA[individualKey]['numericalPrice']
+              DATA[individualKey]['numericalPrice'],
+              DATA[individualKey]['payment'],
+              DATA[individualKey]['furnish'],
+            DATA[individualKey]['agentName'],
+            DATA[individualKey]['sponsered'],
+            DATA[individualKey]['floor'],
+            DATA[individualKey]['serial'],
           );
+
           if(property.country==widget.country && property.city==widget.city && property.area==widget.area && property.typeOfProperty==widget.type){
             if(widget.isRent && property.propertyCategory=="rent"){
-              setState(() {
-                list.add(property);
-              });
+              if(property.sponsered){
+                sponsor.add(property);
+              }
+              else{
+                setState(() {
+                  list.add(property);
+                });
+              }
+
+
             }
             if(!widget.isRent && property.propertyCategory=="buy"){
-              setState(() {
-                list.add(property);
-              });
+              if(property.sponsered){
+                sponsor.add(property);
+              }
+              else{
+                setState(() {
+                  list.add(property);
+                });
+              }
             }
           }
 
 
         }
+        list = new List.from(sponsor)..addAll(list);
       }
     });
     setState(() {
@@ -527,8 +545,6 @@ class _PropertyListState extends State<PropertyList> {
 
     return Scaffold(
         backgroundColor: Colors.grey[200],
-        key: _drawerKey,
-        drawer: MenuDrawer(),
         body: SafeArea(
           child: Stack(
             children: [
@@ -545,14 +561,6 @@ class _PropertyListState extends State<PropertyList> {
                     ),
                     child: Stack(
                       children: [
-                        GestureDetector(
-                          child: Container(
-                              margin: EdgeInsets.only(left: 15),
-                              alignment: Alignment.centerLeft,
-                              child: Icon(Icons.menu,color: primaryColor,)
-                          ),
-                          onTap: ()=>_openDrawer(),
-                        ),
                         Container(
                           alignment: Alignment.center,
                           child: Text('propertyList'.tr(),style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),
