@@ -10,6 +10,7 @@ import 'package:propertymarket/model/location.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:toast/toast.dart';
 
+
 enum rentOrBuy { rent, buy }
 class AddProperty extends StatefulWidget {
   @override
@@ -18,8 +19,12 @@ class AddProperty extends StatefulWidget {
 
 class _AddPropertyState extends State<AddProperty> {
   rentOrBuy _rentOrBuy = rentOrBuy.rent;
+  String arBuy="بيع";
+  String arRent="تاجير";
   bool isRent=true;
-  final priceController=TextEditingController();
+  final enpriceController=TextEditingController();
+  final arpriceController=TextEditingController();
+  final numpriceController=TextEditingController();
   final wordPriceController=TextEditingController();
   final bedController=TextEditingController();
   final bathController=TextEditingController();
@@ -37,10 +42,25 @@ class _AddPropertyState extends State<AddProperty> {
   final floorController=TextEditingController();
   final snoController=TextEditingController();
 
+
+  //arabic text field
+
+
+  final arwordPriceController=TextEditingController();
+  final ardescriptionController=TextEditingController();
+  final arpaymentController=TextEditingController();
+  final arfurnishController=TextEditingController();
+  final aragentNameController=TextEditingController();
+
   String selectedCountryId="";
   String selectedCityId="";
   String selectedAreaId="";
   String selectedTypeId="";
+
+  String selectedCountryAR="";
+  String selectedCityAR="";
+  String selectedAreaAR="";
+  String selectedTypeAR="";
   bool isSponsered=false;
 
   Future<List<LocationModel>> getCountryList() async {
@@ -55,13 +75,16 @@ class _AddPropertyState extends State<AddProperty> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getCityList() async {
@@ -76,13 +99,16 @@ class _AddPropertyState extends State<AddProperty> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getAreaList() async {
@@ -97,13 +123,16 @@ class _AddPropertyState extends State<AddProperty> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getTypeList() async {
@@ -118,13 +147,16 @@ class _AddPropertyState extends State<AddProperty> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
 
@@ -144,6 +176,7 @@ class _AddPropertyState extends State<AddProperty> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -154,7 +187,7 @@ class _AddPropertyState extends State<AddProperty> {
                   margin: EdgeInsets.all(10),
                   child: Text("Countries",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
-                FutureBuilder<List<LocationModel>>(
+                Expanded(child: FutureBuilder<List<LocationModel>>(
                   future: getCountryList(),
                   builder: (context,snapshot){
                     if (snapshot.hasData) {
@@ -169,6 +202,7 @@ class _AddPropertyState extends State<AddProperty> {
                                 onTap: (){
                                   setState(() {
                                     countryController.text=snapshot.data[index].name;
+                                    selectedCountryAR=snapshot.data[index].name_ar;
                                     selectedCountryId=snapshot.data[index].id;
                                   });
                                   Navigator.pop(context);
@@ -198,7 +232,7 @@ class _AddPropertyState extends State<AddProperty> {
                       );
                     }
                   },
-                ),
+                )),
                 SizedBox(
                   height: 15,
                 )
@@ -209,7 +243,6 @@ class _AddPropertyState extends State<AddProperty> {
       },
     );
   }
-
   Future<void> _showCityDailog() async {
     return showDialog<void>(
       context: context,
@@ -226,6 +259,7 @@ class _AddPropertyState extends State<AddProperty> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -234,30 +268,39 @@ class _AddPropertyState extends State<AddProperty> {
               children: [
                 Container(
                   margin: EdgeInsets.all(10),
-                  child: Text("City",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                  child: Text("City", textAlign: TextAlign.center,
+                    style: TextStyle(fontSize: 20,
+                        color: Colors.black,
+                        fontWeight: FontWeight.w600),),
                 ),
-                FutureBuilder<List<LocationModel>>(
+                Expanded(child: FutureBuilder<List<LocationModel>>(
                   future: getCityList(),
-                  builder: (context,snapshot){
+                  builder: (context, snapshot) {
                     if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
+                      if (snapshot.data != null && snapshot.data.length > 0) {
                         return Container(
                           margin: EdgeInsets.all(10),
                           child: ListView.builder(
                             shrinkWrap: true,
                             itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context,int index){
+                            itemBuilder: (BuildContext context, int index) {
                               return GestureDetector(
-                                onTap: (){
+                                onTap: () {
                                   setState(() {
-                                    cityController.text=snapshot.data[index].name;
-                                    selectedCityId=snapshot.data[index].id;
+                                    cityController.text =
+                                        snapshot.data[index].name;
+                                    selectedCityAR =
+                                        snapshot.data[index].name_ar;
+                                    selectedCityId = snapshot.data[index].id;
                                   });
                                   Navigator.pop(context);
                                 },
                                 child: Container(
                                   margin: EdgeInsets.all(5),
-                                  child: Text(snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                  child: Text(snapshot.data[index].name,
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(
+                                        fontSize: 16, color: Colors.black),),
                                 ),
                               );
                             },
@@ -280,7 +323,7 @@ class _AddPropertyState extends State<AddProperty> {
                       );
                     }
                   },
-                ),
+                ),),
                 SizedBox(
                   height: 15,
                 )
@@ -291,7 +334,6 @@ class _AddPropertyState extends State<AddProperty> {
       },
     );
   }
-
   Future<void> _showAreaDailog() async {
     return showDialog<void>(
       context: context,
@@ -308,6 +350,7 @@ class _AddPropertyState extends State<AddProperty> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -318,7 +361,7 @@ class _AddPropertyState extends State<AddProperty> {
                   margin: EdgeInsets.all(10),
                   child: Text("Area",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
-                FutureBuilder<List<LocationModel>>(
+                Expanded(child: FutureBuilder<List<LocationModel>>(
                   future: getAreaList(),
                   builder: (context,snapshot){
                     if (snapshot.hasData) {
@@ -333,6 +376,7 @@ class _AddPropertyState extends State<AddProperty> {
                                 onTap: (){
                                   setState(() {
                                     areaController.text=snapshot.data[index].name;
+                                    selectedAreaAR=snapshot.data[index].name_ar;
                                     selectedAreaId=snapshot.data[index].id;
                                   });
                                   Navigator.pop(context);
@@ -362,7 +406,7 @@ class _AddPropertyState extends State<AddProperty> {
                       );
                     }
                   },
-                ),
+                ),),
                 SizedBox(
                   height: 15,
                 )
@@ -373,7 +417,6 @@ class _AddPropertyState extends State<AddProperty> {
       },
     );
   }
-
   Future<void> _showTypeDailog() async {
     return showDialog<void>(
       context: context,
@@ -390,6 +433,7 @@ class _AddPropertyState extends State<AddProperty> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -400,7 +444,7 @@ class _AddPropertyState extends State<AddProperty> {
                   margin: EdgeInsets.all(10),
                   child: Text("Property Type",textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
                 ),
-                FutureBuilder<List<LocationModel>>(
+                Expanded(child: FutureBuilder<List<LocationModel>>(
                   future: getTypeList(),
                   builder: (context,snapshot){
                     if (snapshot.hasData) {
@@ -415,6 +459,7 @@ class _AddPropertyState extends State<AddProperty> {
                                 onTap: (){
                                   setState(() {
                                     typeController.text=snapshot.data[index].name;
+                                    selectedTypeAR=snapshot.data[index].name_ar;
                                     selectedTypeId=snapshot.data[index].id;
                                   });
                                   Navigator.pop(context);
@@ -444,7 +489,7 @@ class _AddPropertyState extends State<AddProperty> {
                       );
                     }
                   },
-                ),
+                )),
                 SizedBox(
                   height: 15,
                 )
@@ -463,8 +508,10 @@ class _AddPropertyState extends State<AddProperty> {
     final databaseReference = FirebaseDatabase.instance.reference();
     print("url item ${imageURLs.length}");
     databaseReference.child("property").push().set({
-      'price': wordPriceController.text,
-      'numericalPrice': int.parse(priceController.text),
+      'name': wordPriceController.text,
+      'price_ar': arpriceController.text,
+      'price_en': enpriceController.text,
+      'numericalPrice': int.parse(numpriceController.text),
       'beds': bedController.text,
       'bath': bathController.text,
       'call': phoneController.text,
@@ -477,8 +524,10 @@ class _AddPropertyState extends State<AddProperty> {
       'location': "${areaController.text}, ${cityController.text}, ${countryController.text}",
       'measurementArea': areaSqrftController.text,
       'area': areaController.text,
+      'coverImage':imageURLs[0],
       'typeOfProperty': typeController.text,
       'propertyCategory': isRent?"rent":"buy",
+      'propertyCategoryAr': isRent?arRent:arBuy,
       'whatsapp': phoneController.text,
       'payment': paymentController.text,
       'furnish': furnishController.text,
@@ -486,10 +535,20 @@ class _AddPropertyState extends State<AddProperty> {
       'sponsered': isSponsered,
       'floor': floorController.text,
       'serial': snoController.text,
+      'description_ar': ardescriptionController.text,
+      'name_ar': arwordPriceController.text,
+      'agentName_ar': aragentNameController.text,
+      'payment_ar': arpaymentController.text,
+      'furnish_ar': arfurnishController.text,
+      'city_ar': selectedCityAR,
+      'country_ar': selectedCountryAR,
+      'area_ar': selectedAreaAR,
+      'typeOfProperty_ar': selectedTypeAR,
 
     }).then((value) {
       sendNotification();
       Toast.show("Submitted", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+      Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AddProperty()));
 
 
     }).catchError((onError){
@@ -499,9 +558,6 @@ class _AddPropertyState extends State<AddProperty> {
   }
 
   sendNotification() async{
-    String url='https://fcm.googleapis.com/fcm/send';
-
-
     await http.post(
       'https://fcm.googleapis.com/fcm/send',
       headers: <String, String>{
@@ -512,7 +568,7 @@ class _AddPropertyState extends State<AddProperty> {
         <String, dynamic>{
           'notification': <String, dynamic>{
             'body': 'New Property Added',
-            'title': 'New property added from ${areaController.text}, ${cityController.text}, ${countryController.text} at ${priceController.text}'
+            'title': 'New property added from ${areaController.text}, ${cityController.text}, ${countryController.text} at ${enpriceController.text}'
           },
           'priority': 'high',
           'data': <String, dynamic>{
@@ -528,12 +584,14 @@ class _AddPropertyState extends State<AddProperty> {
 
   List<File> imageFiles=[];
   List<String> imageURLs=[];
+  List<String> _progress=[];
   File imagefile;
   void fileSet(File file){
     setState(() {
       if(file!=null){
         imagefile=file;
         imageFiles.add(file);
+        _progress.add("Uploading");
       }
     });
     uploadImageToFirebase(context);
@@ -576,10 +634,9 @@ class _AddPropertyState extends State<AddProperty> {
         }
     );
   }
-
+  int photoIndex=-1;
 
   Future uploadImageToFirebase(BuildContext context) async {
-    String fileName = imagefile.path;
     StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('uploads/${DateTime.now().millisecondsSinceEpoch}');
     StorageUploadTask uploadTask = firebaseStorageRef.putFile(imagefile);
     StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
@@ -588,6 +645,9 @@ class _AddPropertyState extends State<AddProperty> {
             photoUrl=value;
             imageURLs.add(value);
             print("value $value");
+            setState(() {
+              _progress[_progress.length-1]="";
+            });
           },
     );
   }
@@ -611,38 +671,44 @@ class _AddPropertyState extends State<AddProperty> {
                     Container(
                       child: GestureDetector(
                         onTap: (){
-                          _showPicker(context);
+                          if(_progress[_progress.length-1]==""){
+                            _showPicker(context);
+                          }
+                          else
+                            Toast.show("Image Uploading", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                         },
                         child: Image.asset("assets/images/add.png",width: 50,height: 50,),
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    SizedBox(height: 10,),
                     Container(
                       margin: EdgeInsets.all(10),
-                      height: 50,
+                      height: 100,
                       child: ListView.builder(
                         scrollDirection: Axis.horizontal,
                         itemCount: imageFiles.length,
                         itemBuilder: (BuildContext context,int index){
                           return GestureDetector(
                             onTap: (){
-                              /*setState(() {
-                                imageFiles.removeAt(index);
-                                imageURLs.removeAt(index);
-                              });*/
+
                             },
-                            child: Container(
-                              height: 50,
-                              width: 50,
-                              margin: EdgeInsets.only(right: 10),
-                              decoration: BoxDecoration(
-                                  borderRadius: BorderRadius.circular(10),
-                                  image: DecorationImage(
-                                    image: FileImage(imageFiles[index]),
-                                    fit: BoxFit.cover,
-                                  )
-                              ),
-                            ),
+                            child: Column(
+                              children: [
+                                Container(
+                                  height: 75,
+                                  width: 75,
+                                  margin: EdgeInsets.only(right: 10),
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(10),
+                                      image: DecorationImage(
+                                        image: FileImage(imageFiles[index]),
+                                        fit: BoxFit.cover,
+                                      )
+                                  ),
+                                ),
+                                Text(_progress[index],style: TextStyle(fontSize: 12),)
+                              ],
+                            )
                           );
                         },
                       ),
@@ -673,19 +739,40 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          maxLines: 1,
-                          controller: wordPriceController,
-                          decoration: InputDecoration(hintText:"Enter Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              maxLines: 1,
+                              controller: arwordPriceController,
+                              decoration: InputDecoration(hintText:"Enter Name (arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              maxLines: 1,
+                              controller: wordPriceController,
+                              decoration: InputDecoration(hintText:"Enter Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+
+                        ],
+                      )
+
+
                     ]),
                 TableRow(
                     children: [
@@ -694,20 +781,56 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          controller:priceController,
-                          keyboardType: TextInputType.number,
-                          maxLines: 1,
-                          decoration: InputDecoration(hintText:"Price (Number only)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller:enpriceController,
+                              keyboardType: TextInputType.number,
+                              maxLines: 1,
+                              decoration: InputDecoration(hintText:"Price (English)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller:arpriceController,
+                              keyboardType: TextInputType.number,
+                              maxLines: 1,
+                              decoration: InputDecoration(hintText:"Price (Arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller:numpriceController,
+                              keyboardType: TextInputType.number,
+                              maxLines: 1,
+                              decoration: InputDecoration(hintText:"Number only (for sorting)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                        ],
+                      )
+
+
                     ]),
                 TableRow(
                     children: [
@@ -716,6 +839,7 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
+
                       Container(
                         child: TextFormField(
                           validator: (value) {
@@ -737,6 +861,7 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
+
                       Container(
                         child: TextFormField(
                           validator: (value) {
@@ -759,6 +884,7 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
+
                       Container(
                         child: TextFormField(
                           maxLines: 1,
@@ -795,6 +921,7 @@ class _AddPropertyState extends State<AddProperty> {
                           decoration: InputDecoration(hintText:"In meters",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
                         ),
                       ),
+
                     ]),
                 TableRow(
                     children: [
@@ -817,6 +944,7 @@ class _AddPropertyState extends State<AddProperty> {
                           decoration: InputDecoration(hintText:"0",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
                         ),
                       ),
+
                     ]),
                 TableRow(
                     children: [
@@ -826,19 +954,39 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          maxLines: 3,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          controller: descriptionController,
-                          decoration: InputDecoration(hintText:"Property Description",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              maxLines: 3,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: descriptionController,
+                              decoration: InputDecoration(hintText:"Property Description",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              maxLines: 3,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: ardescriptionController,
+                              decoration: InputDecoration(hintText:"Property Description (arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+
+                        ],
+                      )
+
                     ]),
 
                 TableRow(
@@ -848,6 +996,7 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
+
                       Container(
                         child: TextFormField(
                           maxLines: 1,
@@ -891,20 +1040,41 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          maxLines: 1,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          controller: agentNameController,
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: agentNameController,
 
-                          decoration: InputDecoration(hintText:"Enter Agent Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                              decoration: InputDecoration(hintText:"Enter Agent Name",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: aragentNameController,
+
+                              decoration: InputDecoration(hintText:"Enter Agent Name (arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+
+                        ],
+                      )
+
                     ]),
                 TableRow(
                     children: [
@@ -1013,20 +1183,41 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          maxLines: 1,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          controller: paymentController,
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: paymentController,
 
-                          decoration: InputDecoration(hintText:"Enter Payment Type",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                              decoration: InputDecoration(hintText:"Enter Payment Type",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: arpaymentController,
+
+                              decoration: InputDecoration(hintText:"Enter Payment Type (arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+
+                        ],
+                      )
+
                     ]),
                 TableRow(
                     children: [
@@ -1035,21 +1226,44 @@ class _AddPropertyState extends State<AddProperty> {
                         padding: EdgeInsets.all(10),
                         margin: EdgeInsets.only(top: 5),
                       ),
-                      Container(
-                        child: TextFormField(
-                          maxLines: 1,
-                          validator: (value) {
-                            if (value == null || value.isEmpty) {
-                              return 'Please enter some text';
-                            }
-                            return null;
-                          },
-                          controller: furnishController,
+                      Column(
+                        children: [
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: furnishController,
 
-                          decoration: InputDecoration(hintText:"Enter Furnish details",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
-                        ),
-                      ),
+                              decoration: InputDecoration(hintText:"Enter Furnish details",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+                          Divider(color: Colors.grey[600],),
+                          Container(
+                            child: TextFormField(
+                              maxLines: 1,
+                              validator: (value) {
+                                if (value == null || value.isEmpty) {
+                                  return 'Please enter some text';
+                                }
+                                return null;
+                              },
+                              controller: arfurnishController,
+
+                              decoration: InputDecoration(hintText:"Enter Furnish details (arabic)",contentPadding: EdgeInsets.only(left: 10), border: InputBorder.none,),
+                            ),
+                          ),
+
+                        ],
+                      )
+
                     ]),
+
+
 
 
 
@@ -1109,7 +1323,13 @@ class _AddPropertyState extends State<AddProperty> {
               child: RaisedButton(
                 onPressed: (){
                   if (_formKey.currentState.validate()) {
-                    submitData();
+                    if(imageURLs.length>0)
+                      submitData();
+                    else
+                      Toast.show("Please add atleast on image", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                  }
+                  else{
+                    Toast.show("Enter all the fields", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
                   }
 
 

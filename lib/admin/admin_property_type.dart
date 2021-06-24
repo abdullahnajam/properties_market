@@ -17,6 +17,7 @@ class _ViewPropertyTypeState extends State<ViewPropertyType> {
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("type").push().set({
       'name': _controller.text,
+      'name_ar': _arcontroller.text,
 
 
     }).then((value) {
@@ -42,6 +43,7 @@ class _ViewPropertyTypeState extends State<ViewPropertyType> {
           PropertyType partnerModel = new PropertyType(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           print("key ${partnerModel.id}");
           list.add(partnerModel);
@@ -52,6 +54,7 @@ class _ViewPropertyTypeState extends State<ViewPropertyType> {
     return list;
   }
   final _controller=TextEditingController();
+  final _arcontroller=TextEditingController();
   Future<void> _addTypeDailog() async {
     return showDialog<void>(
       context: context,
@@ -68,7 +71,7 @@ class _ViewPropertyTypeState extends State<ViewPropertyType> {
           elevation: 2,
 
           child: Container(
-            height: 200,
+            height: 300,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -84,6 +87,13 @@ class _ViewPropertyTypeState extends State<ViewPropertyType> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(hintText:"Enter Types",contentPadding: EdgeInsets.only(left: 10)),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: TextField(
+                    controller: _arcontroller,
+                    decoration: InputDecoration(hintText:"Enter Types (arabic)",contentPadding: EdgeInsets.only(left: 10)),
                   ),
                 ),
                 Container(

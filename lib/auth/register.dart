@@ -3,13 +3,14 @@ import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:propertymarket/components/form_error.dart';
 import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:page_transition/page_transition.dart';
 import 'package:toast/toast.dart';
-
+import 'package:easy_localization/easy_localization.dart';
 import 'login.dart';
 class Register extends StatefulWidget {
   @override
@@ -44,12 +45,13 @@ class _RegisterState extends State<Register> {
       body: Stack(
         children: [
           Container(
+
             child: Row(
               children: [
-                Text("Sign Up",style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),)
+                Text('signup'.tr(),style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),)
               ],
             ),
-            margin: EdgeInsets.only(top: 50,left: 20),
+            margin: EdgeInsets.only(top: 50,left: 20,right: 20),
           ),
           Container(
 
@@ -70,7 +72,7 @@ class _RegisterState extends State<Register> {
                 children: [
                   SizedBox(height: 40),
                   Text(
-                    "Register Account",
+                    'register'.tr(),
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 28,
@@ -78,7 +80,7 @@ class _RegisterState extends State<Register> {
                     ),
                   ),
                   Text(
-                    "Complete your details",
+                    'complete'.tr(),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 30),
@@ -100,23 +102,25 @@ class _RegisterState extends State<Register> {
                           onTap: ()async{
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
-
+                              final ProgressDialog pr = ProgressDialog(context);
+                              await pr.show();
                               try {
-                                UserCredential userCredential = await FirebaseAuth.instance.createUserWithEmailAndPassword(
+
+                                await FirebaseAuth.instance.createUserWithEmailAndPassword(
                                     email: email,
                                     password: password
                                 ).whenComplete(() {
-                                  FirebaseAuth.instance
-                                      .authStateChanges()
-                                      .listen((User user) {
+                                  
+                                  FirebaseAuth.instance.authStateChanges().listen((User user) {
                                     if (user == null) {
                                       print('User is currently signed out!');
+                                      pr.hide();
                                     } else {
+                                      pr.hide();
                                       print('User is signed in!');
                                       final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
                                       _firebaseMessaging.subscribeToTopic('user');
                                       _firebaseMessaging.getToken().then((value) {
-
                                         print(value);
                                         User user=FirebaseAuth.instance.currentUser;
                                         final databaseReference = FirebaseDatabase.instance.reference();
@@ -131,6 +135,7 @@ class _RegisterState extends State<Register> {
                                   });
                                 });
                               } on FirebaseAuthException catch (e) {
+                                pr.hide();
                                 if (e.code == 'weak-password') {
                                   print('The password provided is too weak.');
                                 } else if (e.code == 'email-already-in-use') {
@@ -138,6 +143,7 @@ class _RegisterState extends State<Register> {
                                   print('The account already exists for that email.');
                                 }
                               } catch (e) {
+                                pr.hide();
                                 print(e);
                               }
 
@@ -153,7 +159,7 @@ class _RegisterState extends State<Register> {
                             width: MediaQuery.of(context).size.width*0.7,
 
                             height: 50,
-                            child: Text("Register",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 18),),
+                            child: Text('signup'.tr(),textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 18),),
                           ),
                         ),
 
@@ -165,12 +171,12 @@ class _RegisterState extends State<Register> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Already have an account?",style: TextStyle(color: Colors.grey[500]),),
+                      Text('already2'.tr(),style: TextStyle(color: Colors.grey[500]),),
                       GestureDetector(
                         onTap: (){
                           Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: Login()));
                         },
-                        child: Text(" Sign In",style: TextStyle(color: primaryColorDark),),
+                        child: Text('signin'.tr(),style: TextStyle(color: primaryColorDark),),
                       )
                     ],
                   )
@@ -230,7 +236,7 @@ class _RegisterState extends State<Register> {
         filled: true,
         prefixIcon: Icon(Icons.lock_outline,color: Colors.black,size: 22,),
         fillColor: Colors.grey[200],
-        hintText: "Enter your password",
+        hintText: 'enterPassword'.tr(),
         // If  you are using latest version of flutter then lable text and hint text shown like this
         // if you r using flutter less then 1.20.* then maybe this is not working properly
         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -286,7 +292,7 @@ class _RegisterState extends State<Register> {
         filled: true,
         prefixIcon: Icon(Icons.email_outlined,color: Colors.black,size: 22,),
         fillColor: Colors.grey[200],
-        hintText: "Enter your email",
+        hintText: 'enterEmail'.tr(),
         // If  you are using latest version of flutter then lable text and hint text shown like this
         // if you r using flutter less then 1.20.* then maybe this is not working properly
         floatingLabelBehavior: FloatingLabelBehavior.always,

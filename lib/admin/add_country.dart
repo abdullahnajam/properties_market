@@ -18,6 +18,7 @@ class _AddCountryState extends State<AddCountry> {
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("country").push().set({
       'name': _controller.text,
+      'name_ar': _arcontroller.text
 
 
     }).then((value) {
@@ -43,6 +44,7 @@ class _AddCountryState extends State<AddCountry> {
           PropertyType partnerModel = new PropertyType(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           print("key ${partnerModel.id}");
           list.add(partnerModel);
@@ -53,6 +55,7 @@ class _AddCountryState extends State<AddCountry> {
     return list;
   }
   final _controller=TextEditingController();
+  final _arcontroller=TextEditingController();
   Future<void> _addTypeDailog() async {
     return showDialog<void>(
       context: context,
@@ -69,7 +72,7 @@ class _AddCountryState extends State<AddCountry> {
           elevation: 2,
 
           child: Container(
-            height: 200,
+            height: 300,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -85,6 +88,13 @@ class _AddCountryState extends State<AddCountry> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(hintText:"Enter Country",contentPadding: EdgeInsets.only(left: 10)),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: TextField(
+                    controller: _arcontroller,
+                    decoration: InputDecoration(hintText:"Enter Country (Arabic)",contentPadding: EdgeInsets.only(left: 10)),
                   ),
                 ),
                 Container(

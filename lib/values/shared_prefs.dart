@@ -12,4 +12,16 @@ class SharedPref{
     SharedPreferences prefs = await SharedPreferences.getInstance();
      prefs.setBool('language', language);
   }
+
+  setFirstTimePref(bool first)async{
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    prefs.setBool('first', first);
+  }
+  Future<bool> getFirstTimePref() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    bool first = prefs.getBool('first') ?? true;
+    print("firstpref $first");
+    return first;
+
+  }
 }

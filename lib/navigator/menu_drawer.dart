@@ -6,9 +6,12 @@ import 'package:propertymarket/data/my_colors.dart';
 import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/favourites.dart';
 import 'package:propertymarket/screens/home.dart';
+import 'package:propertymarket/values/constants.dart';
 import 'package:propertymarket/widget/my_text.dart';
 import 'package:easy_localization/easy_localization.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../privacy_webview.dart';
 class MenuDrawer extends StatefulWidget {
 
 
@@ -120,6 +123,8 @@ class MenuDrawerState extends State<MenuDrawer> {
     );
   }
 
+  void _launchURL() async => await canLaunch(url) ? await launch(url) : throw 'Could not launch $url';
+
 
 
 
@@ -142,6 +147,22 @@ class MenuDrawerState extends State<MenuDrawer> {
             ),
           ),
           SizedBox(height: 30,),
+          InkWell(
+            onTap: (){
+              Navigator.pushReplacement(context, new MaterialPageRoute(
+                  builder: (context) => PrivacyWebView()));
+            },
+            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.assignment_outlined, color: MyColors.grey_20, size: 20),
+                  Container(width: 20),
+                  Expanded(child: Text('privacy'.tr(), style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                ],
+              ),
+            ),
+          ),
+          /*SizedBox(height: 30,),
           InkWell(
             onTap: (){
             Navigator.pushReplacement(context, new MaterialPageRoute(
@@ -204,7 +225,7 @@ class MenuDrawerState extends State<MenuDrawer> {
                 ],
               ),
             ),
-          ),
+          ),*/
 
         ],
       ),

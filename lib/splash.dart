@@ -2,10 +2,14 @@ import 'dart:async';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/admin/admin_home.dart';
+import 'package:propertymarket/admin/admin_search_list.dart';
 import 'package:propertymarket/auth/login.dart';
+import 'package:propertymarket/language_selection.dart';
 import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
+import 'package:propertymarket/values/shared_prefs.dart';
+import 'package:video_player/video_player.dart';
 
 class SplashScreen extends StatefulWidget {
   static String routeName = "/splash";
@@ -18,7 +22,7 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  final splashDelay = 5;
+  final splashDelay = 4;
   User user;
 
   getCurrentUser()async{
@@ -28,43 +32,74 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
-    getCurrentUser();
+    //_controller = VideoPlayerController.network("https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4");
+    _controller = VideoPlayerController.asset("assets/video/intro.mp4");
+    _initializeVideoPlayerFuture = _controller.initialize();
     _loadWidget();
+    //_controller.setLooping(true);
+    getCurrentUser();
   }
   _loadWidget() async {
     var _duration = Duration(seconds: splashDelay);
     return Timer(_duration, navigationPage);
   }
   void navigationPage() {
-    FirebaseAuth.instance.authStateChanges().listen((User user) {
+    _controller.pause();
+    SharedPref sharedPref=SharedPref();
+    sharedPref.getFirstTimePref().then((value) => {
+      if(value){
+        Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => LanguageSelection()))
+      }
+      else{
+        FirebaseAuth.instance.authStateChanges().listen((User user) {
       if (user == null) {
         Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BottomBar()));
       } else {
-        if(user.uid=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
-          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
+        if(user.uid==adminId){
+          Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => AdminSearchList()));
         }
         else
           Navigator.pushReplacement(context, MaterialPageRoute(builder: (BuildContext context) => BottomBar()));
 
       }
+    })
+      }
     });
 
 
+
+
   }
+  VideoPlayerController _controller;
+  Future<void> _initializeVideoPlayerFuture;
   @override
   Widget build(BuildContext context) {
 
     return Scaffold(
-      backgroundColor: primaryColor,
       body: Container(
-          width: double.maxFinite,
+          width: MediaQuery.of(context).size.width,
           height: MediaQuery.of(context).size.height,
-          child: Center(child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Image.asset('assets/images/logo.png',width: 350,height: 350,),
-            ],
-          )),
+          child:FutureBuilder(
+            future: _initializeVideoPlayerFuture,
+            builder: (context, snapshot) {
+              if (snapshot.connectionState == ConnectionState.done) {
+                _controller.play();
+                return Container(
+                  width: MediaQuery.of(context).size.width,
+                  height: MediaQuery.of(context).size.height,
+                  child: AspectRatio(
+                    aspectRatio: _controller.value.aspectRatio,
+                    child: VideoPlayer(_controller),
+                  ),
+                );
+              } else {
+                return Container(
+                  color: primaryColor,
+                  //child: CircularProgressIndicator(),
+                );
+              }
+            },
+          ),
 
       ),
     );

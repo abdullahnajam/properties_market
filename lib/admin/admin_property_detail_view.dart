@@ -1,6 +1,7 @@
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:propertymarket/admin/admin_search_list.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/navigator/admin_drawer.dart';
 import 'package:propertymarket/values/constants.dart';
@@ -65,7 +66,7 @@ class _AdminPropertyDetailState extends State<AdminPropertyDetail> {
                       height: 50,
                       alignment: Alignment.center,
                       color: Colors.grey[200],
-                      child: Text(widget._property.price,style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w600),),
+                      child: Text(widget._property.name,style: TextStyle(color: Colors.black,fontSize: 20,fontWeight: FontWeight.w600),),
                     ),
                     Container(color: Colors.grey[300],height: 3,),
                     SizedBox(height: 10,),
@@ -149,7 +150,7 @@ class _AdminPropertyDetailState extends State<AdminPropertyDetail> {
                                 ),
                                 Expanded(
                                   flex: 2,
-                                  child: Text(widget._property.price,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
+                                  child: Text(widget._property.name,style: TextStyle(fontSize: 16,fontWeight: FontWeight.w400),),
                                 ),
 
                               ],
@@ -265,7 +266,7 @@ class _AdminPropertyDetailState extends State<AdminPropertyDetail> {
                       final databaseReference = FirebaseDatabase.instance.reference();
                       await databaseReference.child("property").child(widget._property.id).remove().then((value) {
                         Navigator.pushReplacement(
-                            context, MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
+                            context, MaterialPageRoute(builder: (BuildContext context) => AdminSearchList()));
                       });
                     },
                     child: Container(

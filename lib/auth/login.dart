@@ -1,4 +1,6 @@
+import 'package:progress_dialog/progress_dialog.dart';
 import 'package:propertymarket/admin/admin_home.dart';
+import 'package:propertymarket/admin/admin_search_list.dart';
 import 'package:propertymarket/auth/register.dart';
 import 'package:propertymarket/components/form_error.dart';
 import 'package:propertymarket/navigator/bottom_navigation.dart';
@@ -8,6 +10,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:page_transition/page_transition.dart';
+import 'package:easy_localization/easy_localization.dart';
 class Login extends StatefulWidget {
   @override
   _LoginState createState() => _LoginState();
@@ -42,10 +45,10 @@ class _LoginState extends State<Login> {
           Container(
             child: Row(
               children: [
-                Text("Sign In",style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),)
+                Text('signin'.tr(),style: TextStyle(color: Colors.white,fontSize: 20,fontWeight: FontWeight.w600),)
               ],
             ),
-            margin: EdgeInsets.only(top: 50,left: 20),
+            margin: EdgeInsets.only(top: 50,left: 20,right: 20),
           ),
           Container(
 
@@ -66,7 +69,7 @@ class _LoginState extends State<Login> {
                 children: [
                   SizedBox(height: 40),
                   Text(
-                    "Welcome",
+                    'title'.tr(),
                     style: TextStyle(
                       color: Colors.black,
                       fontSize: 28,
@@ -74,7 +77,7 @@ class _LoginState extends State<Login> {
                     ),
                   ),
                   Text(
-                    "Sign in with your email and password",
+                    'loginText'.tr(),
                     textAlign: TextAlign.center,
                   ),
                   SizedBox(height: 30),
@@ -95,7 +98,7 @@ class _LoginState extends State<Login> {
                             GestureDetector(
                               onTap: null,
                               child: Text(
-                                "Forgot Password",
+                                "",
                                 style: TextStyle(color: primaryColor),
                               ),
                             )
@@ -108,6 +111,8 @@ class _LoginState extends State<Login> {
                           onTap: () async{
                             if (_formKey.currentState.validate()) {
                               _formKey.currentState.save();
+                              final ProgressDialog pr = ProgressDialog(context);
+                              await pr.show();
                               try {
                                 await FirebaseAuth.instance.signInWithEmailAndPassword(
                                     email: email,
@@ -116,23 +121,28 @@ class _LoginState extends State<Login> {
                                   FirebaseAuth.instance.authStateChanges().listen((User user) {
                                     if (user == null) {
                                       print('User is currently signed out!');
+                                      pr.hide();
                                     } else {
                                       print('User is signed in!');
-                                      if(user.uid=="dShLOfPfm8bbAC9AeSdAShxOuRP2"){
-                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminHome()));
+                                      if(user.uid==adminId){
+                                        pr.hide();
+                                        Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: AdminSearchList()));
                                       }
-                                      else
+                                      else{
+                                        pr.hide();
                                         Navigator.pushReplacement(context, PageTransition(type: PageTransitionType.leftToRight, child: BottomBar()));
+
+                                      }
 
                                     }
                                   });
                                 });
                               } on FirebaseAuthException catch (e) {
                                 if (e.code == 'user-not-found') {
-
+                                  pr.hide();
                                   print('No user found for that email.');
                                 } else if (e.code == 'wrong-password') {
-
+                                  pr.hide();
                                   print('Wrong password provided for that user.');
                                 }
                               }
@@ -148,7 +158,7 @@ class _LoginState extends State<Login> {
                             width: MediaQuery.of(context).size.width*0.7,
 
                             height: 50,
-                            child: Text("Login",textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 18),),
+                            child: Text('login'.tr(),textAlign: TextAlign.center,style: TextStyle(color: Colors.white,fontSize: 18),),
                           ),
                         ),
 
@@ -160,12 +170,12 @@ class _LoginState extends State<Login> {
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Text("Don't have an account?",style: TextStyle(color: Colors.grey[500]),),
+                      Text('already'.tr(),style: TextStyle(color: Colors.grey[500]),),
                       GestureDetector(
                         onTap: (){
                           Navigator.push(context, PageTransition(type: PageTransitionType.leftToRight, child: Register()));
                         },
-                        child: Text(" Sign Up",style: TextStyle(color: primaryColor),),
+                        child: Text('signup'.tr(),style: TextStyle(color: primaryColor),),
                       )
                     ],
                   )
@@ -225,7 +235,7 @@ class _LoginState extends State<Login> {
         filled: true,
         prefixIcon: Icon(Icons.lock_outline,color: Colors.black,size: 22,),
         fillColor: Colors.grey[200],
-        hintText: "Enter your password",
+        hintText: 'enterPassword'.tr(),
         // If  you are using latest version of flutter then lable text and hint text shown like this
         // if you r using flutter less then 1.20.* then maybe this is not working properly
         floatingLabelBehavior: FloatingLabelBehavior.always,
@@ -281,7 +291,7 @@ class _LoginState extends State<Login> {
         filled: true,
         prefixIcon: Icon(Icons.email_outlined,color: Colors.black,size: 22,),
         fillColor: Colors.grey[200],
-        hintText: "Enter your email",
+        hintText: 'enterEmail'.tr(),
         // If  you are using latest version of flutter then lable text and hint text shown like this
         // if you r using flutter less then 1.20.* then maybe this is not working properly
         floatingLabelBehavior: FloatingLabelBehavior.always,

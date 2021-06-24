@@ -2,7 +2,7 @@ import 'package:flutter/cupertino.dart';
 
 const primaryColor = Color(0xFF0247af);
 const backgroundColorLight = Color(0xFFfcdeb3);
-const oneSignalAppId="a20a24f1-42e9-4180-82b6-ec3cfb0aead4";
+const adminId="GSExrT5IUrfVmg9bY9kZcayclFl2";
 const serverToken="AAAAEw4em9g:APA91bGrMl-LZ_gVm1AETZqjl0k4eKAKt16Ilzsp-ngfQuypNqvXmK8Y8FyYMw-N9t9FYGYgS_HFjblGk1bH0rIThyShDTsStDMSrkkRF4s2QLSn3_4pmcU0RcuKvSGczIDFHPVjAdph";
 const primaryColorDark = Color(0xFF2f3b47);
 final RegExp emailValidatorRegExp =
@@ -15,5 +15,6 @@ const String kMatchPassError = "Passwords don't match";
 const String kNamelNullError = "Please Enter your name";
 const String kPhoneNumberNullError = "Please Enter your phone number";
 const String kAddressNullError = "Please Enter your address";
+const String url="https://www.freeprivacypolicy.com/live/b36b4963-0837-491b-ac0b-dadb078b2120";
 
 

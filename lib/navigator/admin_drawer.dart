@@ -1,13 +1,17 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:propertymarket/admin/add_country.dart';
 import 'package:propertymarket/admin/admin_home.dart';
 import 'package:propertymarket/admin/admin_property_type.dart';
+import 'package:propertymarket/admin/admin_search_list.dart';
 import 'package:propertymarket/admin/my_info.dart';
 import 'package:propertymarket/admin/slideshow.dart';
+import 'package:propertymarket/admin/view_news.dart';
 import 'package:propertymarket/auth/login.dart';
 import 'package:propertymarket/data/my_colors.dart';
+import 'package:propertymarket/navigator/bottom_navigation.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:propertymarket/widget/my_text.dart';
 import 'package:toast/toast.dart';
@@ -17,6 +21,32 @@ class AdminDrawer extends StatefulWidget {
 }
 
 class _AdminDrawerState extends State<AdminDrawer> {
+  Future<void> _showPasswordDialog() async {
+    return showDialog<void>(
+      context: context,
+      barrierDismissible: false, // user must tap button!
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Change Password'),
+          content: SingleChildScrollView(
+            child: ListBody(
+              children: const <Widget>[
+                Text('A mail has been sent to you. Please check your mail for reset password link'),
+              ],
+            ),
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('OK'),
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
   final _controller=TextEditingController();
   Future<void> _changePasswordDailog() async {
     return showDialog<void>(
@@ -49,21 +79,27 @@ class _AdminDrawerState extends State<AdminDrawer> {
                   margin: EdgeInsets.all(10),
                   child: TextField(
                     controller: _controller,
-                    decoration: InputDecoration(hintText:"Enter New Password",contentPadding: EdgeInsets.only(left: 10)),
+                    decoration: InputDecoration(hintText:"Enter Your Email Id",contentPadding: EdgeInsets.only(left: 10)),
                   ),
                 ),
                 Container(
                     margin: EdgeInsets.all(10),
                     child: RaisedButton(
                       color: primaryColor,
-                      onPressed: (){
+                      onPressed: ()async{
                         if(_controller.text!=""){
                           final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
-                          User currentUser = firebaseAuth.currentUser;
-                          currentUser.updatePassword(_controller.text).whenComplete((){
-                            Toast.show("Successfully Changed", context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
+                          await firebaseAuth.sendPasswordResetEmail(email: _controller.text).whenComplete((){
+                            final databaseReference = FirebaseDatabase.instance.reference();
+                            databaseReference.child("admin").set({
+                              'password': _controller.text.toString().trim(),
+
+
+                            });
+                            Toast.show("Please check your mail", context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
                             Navigator.pop(context);
                           }).catchError((onError){
+                            print(onError.toString());
                             Toast.show(onError.toString(), context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
 
                           });
@@ -134,7 +170,23 @@ class _AdminDrawerState extends State<AdminDrawer> {
           InkWell(
             onTap: (){
               Navigator.pushReplacement(
-                  context, MaterialPageRoute(builder: (BuildContext context) => AdminHome()));
+                  context, MaterialPageRoute(builder: (BuildContext context) => ViewNews()));
+            },
+            child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
+              child: Row(
+                children: <Widget>[
+                  Icon(Icons.assignment_outlined, color: MyColors.grey_20, size: 20),
+                  Container(width: 20),
+                  Expanded(child: Text("News", style: MyText.body2(context).copyWith(color: MyColors.grey_80))),
+                ],
+              ),
+            ),
+          ),
+          Container(height: 10),
+          InkWell(
+            onTap: (){
+              Navigator.pushReplacement(
+                  context, MaterialPageRoute(builder: (BuildContext context) => AdminSearchList()));
             },
             child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -178,8 +230,22 @@ class _AdminDrawerState extends State<AdminDrawer> {
 
           Container(height: 10),
           InkWell(
-            onTap: (){
-              _changePasswordDailog();
+            onTap: ()async{
+              //_changePasswordDailog();
+              final FirebaseAuth firebaseAuth = FirebaseAuth.instance;
+              await firebaseAuth.sendPasswordResetEmail(email: "propertiesmarket1@gmail.com").whenComplete((){
+                final databaseReference = FirebaseDatabase.instance.reference();
+                databaseReference.child("admin").set({
+                  'password': _controller.text.toString().trim(),
+
+
+                });
+                _showPasswordDialog();
+              }).catchError((onError){
+                print(onError.toString());
+                Toast.show(onError.toString(), context, duration: Toast.LENGTH_LONG, gravity:  Toast.TOP);
+
+              });
             },
             child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),
               child: Row(
@@ -196,7 +262,7 @@ class _AdminDrawerState extends State<AdminDrawer> {
             onTap: () async{
               await FirebaseAuth.instance.signOut().whenComplete((){
                 Navigator.pushReplacement(
-                    context, MaterialPageRoute(builder: (BuildContext context) => Login()));
+                    context, MaterialPageRoute(builder: (BuildContext context) => BottomBar()));
               });
             },
             child: Container(height: 40, padding: EdgeInsets.symmetric(horizontal: 20),

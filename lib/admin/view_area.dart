@@ -21,6 +21,7 @@ class _ViewAreaState extends State<ViewArea> {
     final databaseReference = FirebaseDatabase.instance.reference();
     databaseReference.child("country").child(widget.countryId).child("city").child(widget.cityId).child("area").push().set({
       'name': _controller.text,
+      'name_ar':_arcontroller.text
 
 
     }).then((value) {
@@ -46,6 +47,8 @@ class _ViewAreaState extends State<ViewArea> {
           PropertyType partnerModel = new PropertyType(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
+
           );
           print("key ${partnerModel.id}");
           list.add(partnerModel);
@@ -56,6 +59,7 @@ class _ViewAreaState extends State<ViewArea> {
     return list;
   }
   final _controller=TextEditingController();
+  final _arcontroller=TextEditingController();
   Future<void> _addTypeDailog() async {
     return showDialog<void>(
       context: context,
@@ -72,7 +76,7 @@ class _ViewAreaState extends State<ViewArea> {
           elevation: 2,
 
           child: Container(
-            height: 200,
+            height: 300,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
@@ -88,6 +92,13 @@ class _ViewAreaState extends State<ViewArea> {
                   child: TextField(
                     controller: _controller,
                     decoration: InputDecoration(hintText:"Enter Area",contentPadding: EdgeInsets.only(left: 10)),
+                  ),
+                ),
+                Container(
+                  margin: EdgeInsets.all(10),
+                  child: TextField(
+                    controller: _arcontroller,
+                    decoration: InputDecoration(hintText:"Enter Area (Arabic)",contentPadding: EdgeInsets.only(left: 10)),
                   ),
                 ),
                 Container(

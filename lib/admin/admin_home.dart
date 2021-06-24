@@ -1,4 +1,5 @@
 import 'package:cached_network_image/cached_network_image.dart';
+import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -7,7 +8,7 @@ import 'package:propertymarket/admin/admin_property_detail_view.dart';
 import 'package:propertymarket/model/property.dart';
 import 'package:propertymarket/navigator/admin_drawer.dart';
 import 'package:propertymarket/values/constants.dart';
-import 'package:easy_localization/easy_localization.dart';
+import 'package:propertymarket/values/shared_prefs.dart';
 class AdminHome extends StatefulWidget {
   @override
   _AdminHomeState createState() => _AdminHomeState();
@@ -62,7 +63,7 @@ class _AdminHomeState extends State<AdminHome> {
           Property property = new Property(
               individualKey,
               DATA[individualKey]['image'],
-              DATA[individualKey]['price'].toString(),
+              DATA[individualKey]['name'],
               DATA[individualKey]['location'],
               DATA[individualKey]['country'],
               DATA[individualKey]['city'],
@@ -84,6 +85,18 @@ class _AdminHomeState extends State<AdminHome> {
             DATA[individualKey]['sponsered'],
             DATA[individualKey]['floor'],
             DATA[individualKey]['serial'],
+              DATA[individualKey]['name_ar'],
+              DATA[individualKey]['agentName_ar'],
+              DATA[individualKey]['area_ar'],
+              DATA[individualKey]['city_ar'],
+              DATA[individualKey]['country_ar'],
+              DATA[individualKey]['description_ar'],
+              DATA[individualKey]['furnish_ar'],
+              DATA[individualKey]['payment_ar'],
+              DATA[individualKey]['typeOfProperty_ar'],
+              DATA[individualKey]['propertyCategoryAr'],
+            DATA[individualKey]['price_en'],
+            DATA[individualKey]['price_ar'],
           );
           list.add(property);
 
@@ -183,7 +196,7 @@ class _AdminHomeState extends State<AdminHome> {
                                               children: [
                                                 Text(timeAgoSinceDate(snapshot.data[index].datePosted),style: TextStyle(fontSize: 10,fontWeight: FontWeight.w300),),
                                                 SizedBox(height: 10,),
-                                                Text(snapshot.data[index].price,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18,color: Colors.black),),
+                                                Text(snapshot.data[index].name,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 18,color: Colors.black),),
                                                 SizedBox(height: 5,),
                                                 Text(snapshot.data[index].location,style: TextStyle(fontWeight: FontWeight.w600,fontSize: 15,color: Colors.black),),
                                                 SizedBox(height: 5,),
@@ -255,6 +268,8 @@ class _AdminHomeState extends State<AdminHome> {
   @override
   void initState() {
     super.initState();
+    SharedPref sharedPref=new SharedPref();
+    sharedPref.setPref(true);
 
   }
 }

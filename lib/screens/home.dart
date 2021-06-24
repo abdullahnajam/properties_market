@@ -4,6 +4,7 @@ import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_image_slideshow/flutter_image_slideshow.dart';
+import 'package:lottie/lottie.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:propertymarket/model/location.dart';
 import 'package:propertymarket/model/slideshow.dart';
@@ -25,6 +26,8 @@ class _HomePageState extends State<HomePage> {
 
   final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   String _message = '';
+  SharedPref sharedPref=new SharedPref();
+
 
 
 
@@ -86,6 +89,18 @@ class _HomePageState extends State<HomePage> {
   String selectedAreaId="";
   String selectedTypeId="";
 
+  String engCountry="";
+  String engCity="";
+  String engArea="";
+  String engType="";
+
+  String arCountry="";
+  String arCity="";
+  String arArea="";
+  String arType="";
+
+
+
   String selectedCountryName='selectCountry'.tr();
   String selectedCityName='selectCity'.tr();
   String selectedAreaName='selectArea'.tr();
@@ -103,13 +118,16 @@ class _HomePageState extends State<HomePage> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getCityList() async {
@@ -124,6 +142,7 @@ class _HomePageState extends State<HomePage> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
@@ -131,6 +150,9 @@ class _HomePageState extends State<HomePage> {
       }
     });
 
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getAreaList() async {
@@ -145,13 +167,16 @@ class _HomePageState extends State<HomePage> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
   Future<List<LocationModel>> getTypeList() async {
@@ -166,17 +191,20 @@ class _HomePageState extends State<HomePage> {
           LocationModel locationModel = new LocationModel(
             individualKey,
             DATA[individualKey]['name'],
+            DATA[individualKey]['name_ar'],
           );
           list.add(locationModel);
 
         }
       }
     });
-
+    list.sort((a, b) {
+      return a.name.toLowerCase().compareTo(b.name.toLowerCase());
+    });
     return list;
   }
 
-  Future<void> _showCountryDailog() async {
+  Future<void> _showCountryDailog(bool val) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -192,60 +220,97 @@ class _HomePageState extends State<HomePage> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: Text('country'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('country'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: IconButton(
+                          icon: Icon(Icons.close,color: Colors.grey,),
+                          onPressed: ()=>Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                FutureBuilder<List<LocationModel>>(
-                  future: getCountryList(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context,int index){
-                              return GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedCountryName=snapshot.data[index].name;
-                                    selectedCountryId=snapshot.data[index].id;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  child: Text(snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                Expanded(
+                  child: FutureBuilder<List<LocationModel>>(
+                    future: getCountryList(),
+                    builder: (context,snapshot){
+                      if (snapshot.hasData) {
+                        if (snapshot.data != null && snapshot.data.length>0) {
+                          return Container(
+                            margin: EdgeInsets.all(10),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) {
+                                return Divider(color: Colors.grey,);
+                              },
+                              shrinkWrap: true,
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context,int index){
+                                return GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      !val?selectedCountryName=snapshot.data[index].name_ar:selectedCountryName=snapshot.data[index].name;
+                                      engCountry=snapshot.data[index].name;
+                                      arCountry=snapshot.data[index].name_ar;
+                                      selectedCountryId=snapshot.data[index].id;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Lottie.asset(
+                                  'assets/json/empty.json',
+                                  width: MediaQuery.of(context).size.width*0.4,
+                                  height: MediaQuery.of(context).size.height*0.2,
+                                  fit: BoxFit.fill,
                                 ),
-                              );
-                            },
-                          ),
-                        );
+                              ),
+                              SizedBox(height: 10,),
+                              Container(
+                                  child: Text('noData'.tr(),style: TextStyle(fontSize: 16),)
+                              ),
+                            ],
+                          );
+                        }
                       }
-                      else {
+                      else if (snapshot.hasError) {
+                        return Text('Error : ${snapshot.error}');
+                      } else {
                         return new Center(
-                          child: Container(
-                              child: Text('noData'.tr())
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 15,
@@ -258,7 +323,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _showCityDailog() async {
+  Future<void> _showCityDailog(bool val) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -274,60 +339,98 @@ class _HomePageState extends State<HomePage> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: Text('city'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('city'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: IconButton(
+                          icon: Icon(Icons.close,color: Colors.grey,),
+                          onPressed: ()=>Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                FutureBuilder<List<LocationModel>>(
-                  future: getCityList(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context,int index){
-                              return GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedCityName=snapshot.data[index].name;
-                                    selectedCityId=snapshot.data[index].id;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  child: Text(snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+
+                Expanded(
+                  child: FutureBuilder<List<LocationModel>>(
+                    future: getCityList(),
+                    builder: (context,snapshot){
+                      if (snapshot.hasData) {
+                        if (snapshot.data != null && snapshot.data.length>0) {
+                          return Container(
+                            margin: EdgeInsets.all(10),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) {
+                                return Divider(color: Colors.grey,);
+                              },
+                              shrinkWrap: true,
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context,int index){
+                                return GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      !val?selectedCityName=snapshot.data[index].name_ar:selectedCityName=snapshot.data[index].name;
+                                      engCity=snapshot.data[index].name;
+                                      arCity=snapshot.data[index].name_ar;
+                                      selectedCityId=snapshot.data[index].id;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Lottie.asset(
+                                  'assets/json/empty.json',
+                                  width: MediaQuery.of(context).size.width*0.4,
+                                  height: MediaQuery.of(context).size.height*0.2,
+                                  fit: BoxFit.fill,
                                 ),
-                              );
-                            },
-                          ),
-                        );
+                              ),
+                              SizedBox(height: 10,),
+                              Container(
+                                  child: Text('noData'.tr(),style: TextStyle(fontSize: 16),)
+                              ),
+                            ],
+                          );
+                        }
                       }
-                      else {
+                      else if (snapshot.hasError) {
+                        return Text('Error : ${snapshot.error}');
+                      } else {
                         return new Center(
-                          child: Container(
-                              child: Text('noData'.tr())
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 15,
@@ -340,7 +443,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _showAreaDailog() async {
+  Future<void> _showAreaDailog(bool val) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -356,60 +459,98 @@ class _HomePageState extends State<HomePage> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: Text('area'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('area'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: IconButton(
+                          icon: Icon(Icons.close,color: Colors.grey,),
+                          onPressed: ()=>Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                FutureBuilder<List<LocationModel>>(
-                  future: getAreaList(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context,int index){
-                              return GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedAreaName=snapshot.data[index].name;
-                                    selectedAreaId=snapshot.data[index].id;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  child: Text(snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+
+                Expanded(
+                  child: FutureBuilder<List<LocationModel>>(
+                    future: getAreaList(),
+                    builder: (context,snapshot){
+                      if (snapshot.hasData) {
+                        if (snapshot.data != null && snapshot.data.length>0) {
+                          return Container(
+                            margin: EdgeInsets.all(10),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) {
+                                return Divider(color: Colors.grey,);
+                              },
+                              shrinkWrap: true,
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context,int index){
+                                return GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      !val?selectedAreaName=snapshot.data[index].name_ar:selectedAreaName=snapshot.data[index].name;
+                                      engArea=snapshot.data[index].name;
+                                      arArea=snapshot.data[index].name_ar;
+                                      selectedAreaId=snapshot.data[index].id;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Lottie.asset(
+                                  'assets/json/empty.json',
+                                  width: MediaQuery.of(context).size.width*0.4,
+                                  height: MediaQuery.of(context).size.height*0.2,
+                                  fit: BoxFit.fill,
                                 ),
-                              );
-                            },
-                          ),
-                        );
+                              ),
+                              SizedBox(height: 10,),
+                              Container(
+                                  child: Text('noData'.tr(),style: TextStyle(fontSize: 16),)
+                              ),
+                            ],
+                          );
+                        }
                       }
-                      else {
+                      else if (snapshot.hasError) {
+                        return Text('Error : ${snapshot.error}');
+                      } else {
                         return new Center(
-                          child: Container(
-                              child: Text('noData'.tr())
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 15,
@@ -422,7 +563,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  Future<void> _showTypeDailog() async {
+  Future<void> _showTypeDailog(bool val) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: true, // user must tap button!
@@ -438,60 +579,98 @@ class _HomePageState extends State<HomePage> {
           elevation: 2,
 
           child: Container(
+            height: MediaQuery.of(context).size.height*0.4,
             decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(30)
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Container(
-                  margin: EdgeInsets.all(10),
-                  child: Text('propertyType'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 20,color:Colors.black,fontWeight: FontWeight.w600),),
+                Stack(
+                  children: [
+                    Align(
+                      alignment: Alignment.center,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: Text('propertyType'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
+                      ),
+                    ),
+                    Align(
+                      alignment: Alignment.centerRight,
+                      child: Container(
+                        margin: EdgeInsets.all(10),
+                        child: IconButton(
+                          icon: Icon(Icons.close,color: Colors.grey,),
+                          onPressed: ()=>Navigator.pop(context),
+                        ),
+                      ),
+                    )
+                  ],
                 ),
-                FutureBuilder<List<LocationModel>>(
-                  future: getTypeList(),
-                  builder: (context,snapshot){
-                    if (snapshot.hasData) {
-                      if (snapshot.data != null && snapshot.data.length>0) {
-                        return Container(
-                          margin: EdgeInsets.all(10),
-                          child: ListView.builder(
-                            shrinkWrap: true,
-                            itemCount: snapshot.data.length,
-                            itemBuilder: (BuildContext context,int index){
-                              return GestureDetector(
-                                onTap: (){
-                                  setState(() {
-                                    selectedTypeName=snapshot.data[index].name;
-                                    selectedTypeId=snapshot.data[index].id;
-                                  });
-                                  Navigator.pop(context);
-                                },
-                                child: Container(
-                                  margin: EdgeInsets.all(5),
-                                  child: Text(snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+
+                Expanded(
+                  child: FutureBuilder<List<LocationModel>>(
+                    future: getTypeList(),
+                    builder: (context,snapshot){
+                      if (snapshot.hasData) {
+                        if (snapshot.data != null && snapshot.data.length>0) {
+                          return Container(
+                            margin: EdgeInsets.all(10),
+                            child: ListView.separated(
+                              separatorBuilder: (context, index) {
+                                return Divider(color: Colors.grey,);
+                              },
+                              shrinkWrap: true,
+                              itemCount: snapshot.data.length,
+                              itemBuilder: (BuildContext context,int index){
+                                return GestureDetector(
+                                  onTap: (){
+                                    setState(() {
+                                      !val?selectedTypeName=snapshot.data[index].name_ar:selectedTypeName=snapshot.data[index].name;
+                                      engType=snapshot.data[index].name;
+                                      arType=snapshot.data[index].name_ar;
+                                      selectedTypeId=snapshot.data[index].id;
+                                    });
+                                    Navigator.pop(context);
+                                  },
+                                  child: Container(
+                                    margin: EdgeInsets.all(5),
+                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                  ),
+                                );
+                              },
+                            ),
+                          );
+                        }
+                        else {
+                          return Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Container(
+                                child: Lottie.asset(
+                                  'assets/json/empty.json',
+                                  width: MediaQuery.of(context).size.width*0.4,
+                                  height: MediaQuery.of(context).size.height*0.2,
+                                  fit: BoxFit.fill,
                                 ),
-                              );
-                            },
-                          ),
-                        );
+                              ),
+                              SizedBox(height: 10,),
+                              Container(
+                                  child: Text('noData'.tr(),style: TextStyle(fontSize: 16),)
+                              ),
+                            ],
+                          );
+                        }
                       }
-                      else {
+                      else if (snapshot.hasError) {
+                        return Text('Error : ${snapshot.error}');
+                      } else {
                         return new Center(
-                          child: Container(
-                              child: Text('noData'.tr())
-                          ),
+                          child: CircularProgressIndicator(),
                         );
                       }
-                    }
-                    else if (snapshot.hasError) {
-                      return Text('Error : ${snapshot.error}');
-                    } else {
-                      return new Center(
-                        child: CircularProgressIndicator(),
-                      );
-                    }
-                  },
+                    },
+                  ),
                 ),
                 SizedBox(
                   height: 15,
@@ -548,6 +727,8 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      drawer: MenuDrawer(),
+      key: _drawerKey,
       backgroundColor: Color(0xfff2f8fc),
       body: ListView(
         children: [
@@ -566,12 +747,21 @@ class _HomePageState extends State<HomePage> {
                 ),
                 width: MediaQuery.of(context).size.width,
                 height: slideShowWidget.length==0?MediaQuery.of(context).size.height*0.1:MediaQuery.of(context).size.height*0.33,
-                child: Column(
+                child: Stack(
                   children: [
-                    Container(
-
-                      child: Text('title'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
+                    Align(
+                      alignment: Alignment.topCenter,
+                      child: Container(
+                        child: Text('title'.tr(),style: TextStyle(color: Colors.white,fontSize: 25),),
+                      ),
                     ),
+                    Align(
+                      alignment: Alignment.topLeft,
+                      child: IconButton(
+                        icon: Icon(Icons.menu,color: Colors.white,),
+                        onPressed: _openDrawer,
+                      ),
+                    )
                   ],
                 ),
               ),
@@ -631,6 +821,7 @@ class _HomePageState extends State<HomePage> {
                         setState(() {
                           isRent = true;
                           _rentOrBuy = value;
+                          print(context.locale);
                         });
                       },
                     ),
@@ -658,7 +849,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Divider(color: Colors.grey,),
                 ListTile(
-                  onTap: ()=>_showCountryDailog(),
+                  onTap: ()=>sharedPref.getPref().then((value) => _showCountryDailog(value)),
                   leading: Image.asset("assets/images/country.png",width: 30,height: 30,),
                   title: Text(selectedCountryName,style: TextStyle(color: Colors.grey[600]),),
                   trailing: Icon(Icons.keyboard_arrow_down),
@@ -667,7 +858,7 @@ class _HomePageState extends State<HomePage> {
                 ListTile(
                   onTap: (){
                     if(selectedCountryId!=null){
-                      _showCityDailog();
+                      sharedPref.getPref().then((value) => _showCityDailog(value));
                     }
                     else{
                       //Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
@@ -681,7 +872,8 @@ class _HomePageState extends State<HomePage> {
                 ListTile(
                   onTap: (){
                     if(selectedCountryId!=null && selectedCityId!=null){
-                      _showAreaDailog();
+                      sharedPref.getPref().then((value) => _showAreaDailog(value));
+
                     }
                     else{
                       //Toast.show("Please select above", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
@@ -693,7 +885,7 @@ class _HomePageState extends State<HomePage> {
                 ),
                 Divider(color: Colors.grey,),
                 ListTile(
-                  onTap: ()=>_showTypeDailog(),
+                  onTap: ()=>sharedPref.getPref().then((value) => _showTypeDailog(value)),
                   leading: Image.asset("assets/images/home.png",width: 30,height: 30,),
                   title: Text(selectedTypeName,style: TextStyle(color: Colors.grey[600]),),
                   trailing: Icon(Icons.keyboard_arrow_down),
@@ -702,7 +894,7 @@ class _HomePageState extends State<HomePage> {
                   onTap: (){
                     if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
                       Navigator.push(context,
-                          MaterialPageRoute(builder: (BuildContext context) => PropertyList(selectedCountryName,selectedCityName,selectedAreaName,selectedTypeName,isRent)));
+                          MaterialPageRoute(builder: (BuildContext context) => PropertyList(engCountry,engCity,engArea,engType,isRent)));
                     }
                     else{
                       //Toast.show("Please fill the form", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);

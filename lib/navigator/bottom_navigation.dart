@@ -5,6 +5,7 @@ import 'package:propertymarket/auth/login.dart';
 import 'package:propertymarket/model/info.dart';
 import 'package:propertymarket/screens/favourites.dart';
 import 'package:propertymarket/screens/home.dart';
+import 'package:propertymarket/screens/news.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:propertymarket/values/shared_prefs.dart';
@@ -37,7 +38,7 @@ class _BottomNavigationState extends State<BottomBar>{
   }
   logout()async{
     await FirebaseAuth.instance.signOut().whenComplete((){
-      Navigator.pushReplacement(
+      Navigator.push(
           context, MaterialPageRoute(builder: (BuildContext context) => Login()));
     });
   }
@@ -150,7 +151,8 @@ class _BottomNavigationState extends State<BottomBar>{
                     context.locale = Locale('ar', 'EG');
                     SharedPref sharedPref=new SharedPref();
                     sharedPref.setPref(false);
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(context, new MaterialPageRoute(
+                        builder: (context) => BottomBar()));
                   },
                   title: Text('arabic'.tr()),
                 ),
@@ -159,7 +161,8 @@ class _BottomNavigationState extends State<BottomBar>{
                     context.locale = Locale('en', 'US');
                     SharedPref sharedPref=new SharedPref();
                     sharedPref.setPref(true);
-                    Navigator.pop(context);
+                    Navigator.pushReplacement(context, new MaterialPageRoute(
+                        builder: (context) => BottomBar()));
                   },
                   title: Text("English"),
                 ),
@@ -179,6 +182,7 @@ class _BottomNavigationState extends State<BottomBar>{
     super.initState();
     _children = [
       HomePage(),
+      News(),
       Container(),
       Container(),
       Container(),
@@ -194,17 +198,22 @@ class _BottomNavigationState extends State<BottomBar>{
         _currentIndex = index;
       });
     }
-    else if(index==1){
-      _showChangeLanguageDailog();
+    if(index==1){
+      setState(() {
+        _currentIndex = index;
+      });
     }
     else if(index==2){
+      _showChangeLanguageDailog();
+    }
+    else if(index==3){
       _showInfoDailog();
     }
 
-    else if(index==3){
+    else if(index==4){
       logout();
     }
-    else if(index==4){
+    else if(index==5){
       User user=FirebaseAuth.instance.currentUser;
       if(user==null){
         Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => Login()));
@@ -234,25 +243,30 @@ class _BottomNavigationState extends State<BottomBar>{
         onTap: onTabTapped, // new
         currentIndex: _currentIndex,
         items: [
+
           BottomNavigationBarItem(
-            icon: new Icon(Icons.search),
-            label: "Search"
+              icon: new Icon(Icons.search),
+              label: 'search'.tr()
+          ),
+          BottomNavigationBarItem(
+              icon: new Icon(Icons.assignment_outlined),
+              label: 'news'.tr()
           ),
           BottomNavigationBarItem(
             icon: new Icon(Icons.language_outlined),
-              label: "Language"
+              label: 'language'.tr()
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.add),
-              label: "Add"
+              label: 'add'.tr()
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.vpn_key_outlined),
-              label: "Logout"
+              label: FirebaseAuth.instance.currentUser.uid==null?'login'.tr():'logout'.tr()
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border),
-              label: "Favourite"
+              label: 'favourite'.tr()
           ),
         ],
       ),

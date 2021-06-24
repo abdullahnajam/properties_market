@@ -1,6 +1,6 @@
 class LocationModel{
-  String id,name;
+  String id,name,name_ar;
 
-  LocationModel(this.id, this.name);
+  LocationModel(this.id, this.name,this.name_ar);
 
 }
