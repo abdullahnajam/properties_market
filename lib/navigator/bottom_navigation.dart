@@ -262,7 +262,7 @@ class _BottomNavigationState extends State<BottomBar>{
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.vpn_key_outlined),
-              label: FirebaseAuth.instance.currentUser.uid==null?'login'.tr():'logout'.tr()
+              label: FirebaseAuth.instance.currentUser==null?'login'.tr():'logout'.tr()
           ),
           BottomNavigationBarItem(
               icon: Icon(Icons.favorite_border),
