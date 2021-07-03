@@ -1,12 +1,13 @@
+import 'package:admob_flutter/admob_flutter.dart';
 import 'package:easy_localization/easy_localization.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 import 'package:overlay_support/overlay_support.dart';
 import 'package:propertymarket/splash.dart';
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+  Admob.initialize();
   await Firebase.initializeApp();
   runApp(EasyLocalization(
       supportedLocales: [Locale('en', 'US'), Locale('ar', 'EG')],
@@ -17,7 +18,7 @@ void main() async{
 }
 
 class MyApp extends StatelessWidget {
-  // This widget is the root of your application.
+
   @override
   Widget build(BuildContext context) {
 

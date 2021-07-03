@@ -14,6 +14,7 @@
   "country": "Country",
   "city": "City",
   "area": "Area",
+  "areaSelect":"Area",
   "propertyType": "Property Type",
   "selectCountry": "Select Country",
   "selectCity": "Select City",

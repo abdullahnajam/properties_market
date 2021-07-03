@@ -10,6 +10,7 @@ import 'package:propertymarket/screens/home.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:propertymarket/values/shared_prefs.dart';
 import 'package:video_player/video_player.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 
 class SplashScreen extends StatefulWidget {
   static String routeName = "/splash";
@@ -32,6 +33,9 @@ class _SplashScreenState extends State<SplashScreen> {
   @override
   void initState() {
     super.initState();
+    FacebookAudienceNetwork.init(
+        testingId: "97294348-249f-4530-b841-55eed93b02f0"
+    );
     //_controller = VideoPlayerController.network("https://flutter.github.io/assets-for-api-docs/assets/videos/butterfly.mp4");
     _controller = VideoPlayerController.asset("assets/video/intro.mp4");
     _initializeVideoPlayerFuture = _controller.initialize();

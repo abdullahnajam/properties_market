@@ -51,6 +51,9 @@ dependencies:
   rxdart: any
   lottie: ^0.7.0
   webview_flutter: ^1.0.7
+  admob_flutter: ^1.0.1
+  facebook_audience_network: ^0.9.0
+  flutter_facebook_sdk:
 
 flutter_icons:
   android: "launcher_icon"

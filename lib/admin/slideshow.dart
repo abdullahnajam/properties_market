@@ -36,6 +36,7 @@ class _SlideShowState extends State<AddSlideShow> {
             individualKey,
             DATA[individualKey]['image'],
               DATA[individualKey]['language'],
+            DATA[individualKey]['date'],
           );
           print("key ${partnerModel.id}");
           list.add(partnerModel);
@@ -154,7 +155,8 @@ class _SlideShowState extends State<AddSlideShow> {
           final databaseReference = FirebaseDatabase.instance.reference();
           databaseReference.child("slideshow").push().set({
             'image': photoUrl,
-            'language':"ar"
+            'language':"ar",
+            'date':DateTime.now().toString()
           }).then((value) {
             pr.hide();
             Toast.show("Submitted", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
@@ -170,7 +172,8 @@ class _SlideShowState extends State<AddSlideShow> {
           final databaseReference = FirebaseDatabase.instance.reference();
           databaseReference.child("slideshow").push().set({
             'image': photoUrl,
-            'language':"en"
+            'language':"en",
+            'date':DateTime.now().toString()
           }).then((value) {
             pr.hide();
             Toast.show("Submitted", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);

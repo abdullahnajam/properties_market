@@ -13,6 +13,7 @@
   "country": "دولة",
   "city": "مدينة",
   "area": "المساحة",
+  "areaSelect":"منطقة",
   "propertyType": "نوع العقار",
   "selectCountry": "حدد الدولة",
   "selectCity": "اختر مدينة",

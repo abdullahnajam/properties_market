@@ -15,6 +15,29 @@
       <string>https</string>
       <string>http</string>
     </array>
+    <key>GADApplicationIdentifier</key>
+    <string>ca-app-pub-9395198588563221~1994034257</string>
+    <key>io.flutter.embedded_views_preview</key>
+    <true/>
+    <key>NSUserTrackingUsageDescription</key>
+    <string>This identifier will be used to deliver personalized ads to you.</string>
+    <key>CFBundleURLTypes</key>
+        <array>
+          <dict>
+          <key>CFBundleURLSchemes</key>
+          <array>
+            <string>fb505351880774829</string>
+          </array>
+          </dict>
+        </array>
+        <key>FacebookAppID</key>
+        <string>505351880774829</string>
+        <key>FacebookDisplayName</key>
+        <string>Property Market</string>
+        <key>FacebookAutoLogAppEventsEnabled</key>
+        <true/>
+        <key>FacebookAdvertiserIDCollectionEnabled</key>
+        <true/>
 	<key>CFBundleName</key>
 	<string>propertymarket</string>
 	<key>CFBundlePackageType</key>

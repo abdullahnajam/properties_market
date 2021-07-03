@@ -1,3 +1,5 @@
+import 'package:admob_flutter/admob_flutter.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/material.dart';
@@ -17,6 +19,7 @@ class BottomBar extends StatefulWidget {
 }
 
 class _BottomNavigationState extends State<BottomBar>{
+
 
   int _currentIndex = 0;
 
@@ -176,10 +179,15 @@ class _BottomNavigationState extends State<BottomBar>{
       },
     );
   }
+  AdmobBannerSize bannerSize;
+  AdmobInterstitial interstitialAd;
+  AdmobReward rewardAd;
 
   @override
   void initState() {
     super.initState();
+
+
     _children = [
       HomePage(),
       News(),
@@ -190,18 +198,115 @@ class _BottomNavigationState extends State<BottomBar>{
 
 
     ];
+    Admob.requestTrackingAuthorization();
+    bannerSize = AdmobBannerSize.BANNER;
+
+    interstitialAd = AdmobInterstitial(
+      adUnitId: androidInterstitialVideo,
+      listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+        if (event == AdmobAdEvent.closed) interstitialAd.load();
+        handleEvent(event, args, 'Interstitial');
+      },
+    );
+
+    interstitialAd.load();
+
+  }
+  bool isAdmobLoadedForBanner=true;
+  bool isAdmobLoadedForInterstitial=true;
+  void handleEvent(
+      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        print('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        print('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        print('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        if(adType=="Banner"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        if(adType=="Interstitial"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        print('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                print("snack bar popped");
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
   }
 
-  void onTabTapped(int index) {
+  void onTabTapped(int index) async{
     if(index==0){
-      setState(() {
-        _currentIndex = index;
-      });
+      if (await interstitialAd.isLoaded) {
+        interstitialAd.show();
+        setState(() {
+          _currentIndex = index;
+        });
+      }
+      else {
+        FacebookInterstitialAd.loadInterstitialAd(
+          placementId: androidFanInterstitialVideo,
+          listener: (result, value) {
+            if (result == InterstitialAdResult.LOADED)
+              FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+          },
+        );
+        setState(() {
+          _currentIndex = index;
+        });
+      }
+
     }
     if(index==1){
-      setState(() {
-        _currentIndex = index;
-      });
+      if (await interstitialAd.isLoaded) {
+        interstitialAd.show();
+        setState(() {
+          _currentIndex = index;
+        });
+      }
+      else {
+        FacebookInterstitialAd.loadInterstitialAd(
+          placementId: androidFanInterstitialVideo,
+          listener: (result, value) {
+            if (result == InterstitialAdResult.LOADED)
+              FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+          },
+        );
+        setState(() {
+          _currentIndex = index;
+        });
+      }
     }
     else if(index==2){
       _showChangeLanguageDailog();

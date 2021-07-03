@@ -1,3 +1,5 @@
+import 'dart:io';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
@@ -12,8 +14,8 @@ import 'package:propertymarket/navigator/menu_drawer.dart';
 import 'package:propertymarket/screens/property_list.dart';
 import 'package:propertymarket/values/constants.dart';
 import 'package:propertymarket/values/shared_prefs.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:toast/toast.dart';
+import 'package:admob_flutter/admob_flutter.dart';
+
 import 'package:easy_localization/easy_localization.dart';
 
 enum rentOrBuy { rent, buy }
@@ -60,10 +62,27 @@ class _HomePageState extends State<HomePage> {
       setState(() => _message = message["notification"]["body"]);
     });
   }
+  AdmobBannerSize bannerSize;
+  AdmobInterstitial interstitialAd;
+  bool isAdmobLoadedForBanner=true;
+  bool isAdmobLoadedForInterstitial=true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+
+    Admob.requestTrackingAuthorization();
+
+    interstitialAd = AdmobInterstitial(
+      adUnitId: androidInterstitialVideo,
+      listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+        if (event == AdmobAdEvent.closed) interstitialAd.load();
+        handleEvent(event, args, 'Interstitial');
+      },
+    );
+
+    interstitialAd.load();
+
     getMessage();
     SharedPref sharedPref=new SharedPref();
     sharedPref.getPref().then((value) {
@@ -77,13 +96,65 @@ class _HomePageState extends State<HomePage> {
     });
 
   }
+  void handleEvent(
+      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        print('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        print('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        print('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        if(adType=="Banner"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        if(adType=="Interstitial"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        print('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                print("snack bar popped");
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
+  }
+
 
 
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   void _openDrawer () {
     _drawerKey.currentState.openDrawer();
   }
-
+  final _scrollController = ScrollController();
   String selectedCountryId="";
   String selectedCityId="";
   String selectedAreaId="";
@@ -248,6 +319,7 @@ class _HomePageState extends State<HomePage> {
                     )
                   ],
                 ),
+
                 Expanded(
                   child: FutureBuilder<List<LocationModel>>(
                     future: getCountryList(),
@@ -256,29 +328,34 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.data != null && snapshot.data.length>0) {
                           return Container(
                             margin: EdgeInsets.all(10),
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) {
-                                return Divider(color: Colors.grey,);
-                              },
-                              shrinkWrap: true,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context,int index){
-                                return GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      !val?selectedCountryName=snapshot.data[index].name_ar:selectedCountryName=snapshot.data[index].name;
-                                      engCountry=snapshot.data[index].name;
-                                      arCountry=snapshot.data[index].name_ar;
-                                      selectedCountryId=snapshot.data[index].id;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
-                                  ),
-                                );
-                              },
+                            child: Scrollbar(
+                              controller: _scrollController,
+                              isAlwaysShown: snapshot.data.length>3?true:false,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                separatorBuilder: (context, index) {
+                                  return Divider(color: Colors.grey,);
+                                },
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context,int index){
+                                  return GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        !val?selectedCountryName=snapshot.data[index].name_ar:selectedCountryName=snapshot.data[index].name;
+                                        engCountry=snapshot.data[index].name;
+                                        arCountry=snapshot.data[index].name_ar;
+                                        selectedCountryId=snapshot.data[index].id;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.all(5),
+                                      child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           );
                         }
@@ -376,29 +453,34 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.data != null && snapshot.data.length>0) {
                           return Container(
                             margin: EdgeInsets.all(10),
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) {
-                                return Divider(color: Colors.grey,);
-                              },
-                              shrinkWrap: true,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context,int index){
-                                return GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      !val?selectedCityName=snapshot.data[index].name_ar:selectedCityName=snapshot.data[index].name;
-                                      engCity=snapshot.data[index].name;
-                                      arCity=snapshot.data[index].name_ar;
-                                      selectedCityId=snapshot.data[index].id;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
-                                  ),
-                                );
-                              },
+                            child: Scrollbar(
+                              controller: _scrollController,
+                              isAlwaysShown: snapshot.data.length>3?true:false,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                separatorBuilder: (context, index) {
+                                  return Divider(color: Colors.grey,);
+                                },
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context,int index){
+                                  return GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        !val?selectedCityName=snapshot.data[index].name_ar:selectedCityName=snapshot.data[index].name;
+                                        engCity=snapshot.data[index].name;
+                                        arCity=snapshot.data[index].name_ar;
+                                        selectedCityId=snapshot.data[index].id;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.all(5),
+                                      child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           );
                         }
@@ -472,7 +554,7 @@ class _HomePageState extends State<HomePage> {
                       alignment: Alignment.center,
                       child: Container(
                         margin: EdgeInsets.all(10),
-                        child: Text('area'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
+                        child: Text('areaSelect'.tr(),textAlign: TextAlign.center,style: TextStyle(fontSize: 25,color:Colors.black,fontWeight: FontWeight.w600),),
                       ),
                     ),
                     Align(
@@ -496,30 +578,35 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.data != null && snapshot.data.length>0) {
                           return Container(
                             margin: EdgeInsets.all(10),
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) {
-                                return Divider(color: Colors.grey,);
-                              },
-                              shrinkWrap: true,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context,int index){
-                                return GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      !val?selectedAreaName=snapshot.data[index].name_ar:selectedAreaName=snapshot.data[index].name;
-                                      engArea=snapshot.data[index].name;
-                                      arArea=snapshot.data[index].name_ar;
-                                      selectedAreaId=snapshot.data[index].id;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
-                                  ),
-                                );
-                              },
-                            ),
+                            child: Scrollbar(
+                              controller: _scrollController,
+                              isAlwaysShown: snapshot.data.length>3?true:false,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                separatorBuilder: (context, index) {
+                                  return Divider(color: Colors.grey,);
+                                },
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context,int index){
+                                  return GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        !val?selectedAreaName=snapshot.data[index].name_ar:selectedAreaName=snapshot.data[index].name;
+                                        engArea=snapshot.data[index].name;
+                                        arArea=snapshot.data[index].name_ar;
+                                        selectedAreaId=snapshot.data[index].id;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.all(5),
+                                      child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
                           );
                         }
                         else {
@@ -616,30 +703,36 @@ class _HomePageState extends State<HomePage> {
                         if (snapshot.data != null && snapshot.data.length>0) {
                           return Container(
                             margin: EdgeInsets.all(10),
-                            child: ListView.separated(
-                              separatorBuilder: (context, index) {
-                                return Divider(color: Colors.grey,);
-                              },
-                              shrinkWrap: true,
-                              itemCount: snapshot.data.length,
-                              itemBuilder: (BuildContext context,int index){
-                                return GestureDetector(
-                                  onTap: (){
-                                    setState(() {
-                                      !val?selectedTypeName=snapshot.data[index].name_ar:selectedTypeName=snapshot.data[index].name;
-                                      engType=snapshot.data[index].name;
-                                      arType=snapshot.data[index].name_ar;
-                                      selectedTypeId=snapshot.data[index].id;
-                                    });
-                                    Navigator.pop(context);
-                                  },
-                                  child: Container(
-                                    margin: EdgeInsets.all(5),
-                                    child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
-                                  ),
-                                );
-                              },
-                            ),
+                            child: Scrollbar(
+
+                              controller: _scrollController,
+                              isAlwaysShown: snapshot.data.length>3?true:false,
+                              child: ListView.separated(
+                                controller: _scrollController,
+                                separatorBuilder: (context, index) {
+                                  return Divider(color: Colors.grey,);
+                                },
+                                shrinkWrap: true,
+                                itemCount: snapshot.data.length,
+                                itemBuilder: (BuildContext context,int index){
+                                  return GestureDetector(
+                                    onTap: (){
+                                      setState(() {
+                                        !val?selectedTypeName=snapshot.data[index].name_ar:selectedTypeName=snapshot.data[index].name;
+                                        engType=snapshot.data[index].name;
+                                        arType=snapshot.data[index].name_ar;
+                                        selectedTypeId=snapshot.data[index].id;
+                                      });
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      margin: EdgeInsets.all(5),
+                                      child: Text(!val?snapshot.data[index].name_ar:snapshot.data[index].name,textAlign: TextAlign.center,style: TextStyle(fontSize: 16,color:Colors.black),),
+                                    ),
+                                  );
+                                },
+                              ),
+                            )
                           );
                         }
                         else {
@@ -706,20 +799,22 @@ class _HomePageState extends State<HomePage> {
             individualKey,
             DATA[individualKey]['image'],
             DATA[individualKey]['language'],
+            DATA[individualKey]['date'],
+
           );
-          print("compare ${slideShow.language} vs $language");
-          if(slideShow.language==language){
-            print("compared ${slideShow.language} vs $language");
-            setState(() {
-              slideShowList.add(slideShow);
-              slideShowWidget.add(_slider(slideShow.image));
-            });
-          }
-
-
+          slideShowList.add(slideShow);
         }
       }
     });
+    slideShowList.sort((a, b) => DateTime.parse(a.date).millisecondsSinceEpoch.compareTo(DateTime.parse(b.date).millisecondsSinceEpoch));
+    for(int i=0;i<slideShowList.length;i++){
+      if(slideShowList[i].language==language){
+
+        setState(() {
+          slideShowWidget.add(_slider(slideShowList[i].image));
+        });
+      }
+    }
     return slideShowWidget;
   }
 
@@ -794,9 +889,9 @@ class _HomePageState extends State<HomePage> {
                   children: slideShowWidget,
 
                   /// Called whenever the page in the center of the viewport changes.
-                  onPageChanged: (value) {
+                 /* onPageChanged: (value) {
                     print('Page changed: $value');
-                  },
+                  },*/
 
                   /// Auto scroll interval.
                   /// Do not auto scroll with null or 0.
@@ -805,6 +900,8 @@ class _HomePageState extends State<HomePage> {
               ):Container()
             ],
           ),
+
+
           Container(
             height: MediaQuery.of(context).size.height*0.54,
             margin: EdgeInsets.only(left: 10,right: 10,top: 10),
@@ -891,14 +988,30 @@ class _HomePageState extends State<HomePage> {
                   trailing: Icon(Icons.keyboard_arrow_down),
                 ),
                 InkWell(
-                  onTap: (){
-                    if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
-                      Navigator.push(context,
-                          MaterialPageRoute(builder: (BuildContext context) => PropertyList(engCountry,engCity,engArea,engType,isRent)));
+                  onTap: ()async{
+                    if (await interstitialAd.isLoaded) {
+                      interstitialAd.show();
+                      if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (BuildContext context) => PropertyList(engCountry,engCity,engArea,engType,isRent)));
+                      }
                     }
-                    else{
-                      //Toast.show("Please fill the form", context, duration: Toast.LENGTH_LONG, gravity:  Toast.BOTTOM);
+                    else {
+                      FacebookInterstitialAd.loadInterstitialAd(
+                        placementId: androidFanInterstitialVideo,
+                        listener: (result, value) {
+                          if (result == InterstitialAdResult.LOADED)
+                            FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+                        },
+                      );
+                      if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
+                        Navigator.push(context,
+                            MaterialPageRoute(builder: (BuildContext context) => PropertyList(engCountry,engCity,engArea,engType,isRent)));
+                      }
+                      print('Interstitial ad is still loading...');
                     }
+
+
                   },
                   child: Container(
                     alignment: Alignment.center,

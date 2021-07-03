@@ -1,3 +1,7 @@
+import 'dart:io';
+
+import 'package:admob_flutter/admob_flutter.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -33,6 +37,8 @@ class _PropertyListState extends State<PropertyList> {
   bool bedAll=false;
   bool priceAll=false;
   bool areaAll=false;
+
+
 
 
   String selectedCountryName='selectCountry'.tr();
@@ -478,15 +484,86 @@ class _PropertyListState extends State<PropertyList> {
   bool sortOpened=false;
   bool filterOpened=false;
   bool isAccessding=false;
+
+
+  AdmobBannerSize bannerSize;
+  AdmobBannerSize smallBannerSize;
+  AdmobInterstitial interstitialAd;
+  bool isAdmobLoadedForBanner=true;
+  bool isAdmobLoadedForInterstitial=true;
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    Admob.requestTrackingAuthorization();
+    bannerSize = AdmobBannerSize.LARGE_BANNER;
+    smallBannerSize= AdmobBannerSize.BANNER;
+
+    interstitialAd = AdmobInterstitial(
+      adUnitId: androidInterstitialVideo,
+      listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+        if (event == AdmobAdEvent.closed) interstitialAd.load();
+        handleEvent(event, args, 'Interstitial');
+      },
+    );
+    interstitialAd.load();
+
     priceFromController.text="0";
     priceToController.text="0";
     areaToController.text="0";
     areaFromController.text="0";
     getPropertyList();
+  }
+  void handleEvent(
+      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        print('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        print('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        print('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        if(adType=="Banner"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        if(adType=="Interstitial"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        print('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                print("snack bar popped");
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
   }
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();
   void _openDrawer () {
@@ -813,19 +890,48 @@ class _PropertyListState extends State<PropertyList> {
                               child: Text('propertyList'.tr(),style: TextStyle(fontWeight: FontWeight.w700,fontSize: 13),),
                             ),
                             InkWell(
+
                               onTap: ()async{
-                                if(snapshot.data){
-                                  final result = await showSearch<String>(
-                                    context: context,
-                                    delegate: NameSearchEn(searchRest),
-                                  );
+                                if (await interstitialAd.isLoaded) {
+                                  interstitialAd.show();
+                                  if(snapshot.data){
+
+                                    final result = await showSearch<String>(
+                                      context: context,
+                                      delegate: NameSearchEn(searchRest),
+                                    );
+                                  }
+                                  else{
+                                    final result = await showSearch<String>(
+                                      context: context,
+                                      delegate: NameSearch(searchRest),
+                                    );
+                                  }
                                 }
-                                else{
-                                  final result = await showSearch<String>(
-                                    context: context,
-                                    delegate: NameSearch(searchRest),
+                                else {
+                                  FacebookInterstitialAd.loadInterstitialAd(
+                                    placementId: androidFanInterstitialVideo,
+                                    listener: (result, value) {
+                                      if (result == InterstitialAdResult.LOADED)
+                                        FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+                                    },
                                   );
+                                  if(snapshot.data){
+
+                                    final result = await showSearch<String>(
+                                      context: context,
+                                      delegate: NameSearchEn(searchRest),
+                                    );
+                                  }
+                                  else{
+                                    final result = await showSearch<String>(
+                                      context: context,
+                                      delegate: NameSearch(searchRest),
+                                    );
+                                  }
+                                  print('Interstitial ad is still loading...');
                                 }
+
 
                                 //Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => SearchProperty()));
                               },
@@ -846,6 +952,7 @@ class _PropertyListState extends State<PropertyList> {
                                 ),
                               ),
                             ),
+
                             Container(
                               child: Row(
                                 mainAxisAlignment: MainAxisAlignment.end,
@@ -908,15 +1015,64 @@ class _PropertyListState extends State<PropertyList> {
                             isLoaded?
                             list.length>0?Container(
                               margin: EdgeInsets.all(10),
-                              child: ListView.builder(
+                              child: ListView.separated(
+                                separatorBuilder: (context, position) {
+                                  return Container(
+                                    margin: EdgeInsets.only(bottom: 10),
+                                      child: (position != 0 && position % 4 == 0) ?
+                                  isAdmobLoadedForBanner?AdmobBanner(
+                                    adUnitId: androidAdmobBanner,
+                                    adSize: bannerSize,
+                                    listener: (AdmobAdEvent event,
+                                        Map<String, dynamic> args) {
+                                      handleEvent(event, args, 'Banner');
+                                    }, onBannerCreated: (AdmobBannerController controller) {
+                                    },
+                                  ):Container(
+                                    alignment: Alignment(0.5, 1),
+                                    child: FacebookBannerAd(
+                                      placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
+                                      bannerSize: BannerSize.STANDARD,
+                                      listener: (result, value) {
+                                        switch (result) {
+                                          case BannerAdResult.ERROR:
+                                            print("Error: $value");
+                                            break;
+                                          case BannerAdResult.LOADED:
+                                            print("Loaded: $value");
+                                            break;
+                                          case BannerAdResult.CLICKED:
+                                            print("Clicked: $value");
+                                            break;
+                                          case BannerAdResult.LOGGING_IMPRESSION:
+                                            print("Logging Impression: $value");
+                                            break;
+                                        }
+                                      },
+                                    ),
+                                  ): Container());
+                                  },
                                 physics: NeverScrollableScrollPhysics(),
                                 shrinkWrap: true,
                                 itemCount: list.length,
                                 itemBuilder: (BuildContext context,int index){
                                   return GestureDetector(
-                                      onTap: (){
-                                        Navigator.push(
-                                            context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index],snapshot.data)));
+                                      onTap: ()async{
+                                        if (await interstitialAd.isLoaded) {
+                                          interstitialAd.show();
+                                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index],snapshot.data)));
+                                        }
+                                        else {
+                                          FacebookInterstitialAd.loadInterstitialAd(
+                                            placementId: androidFanInterstitialVideo,
+                                            listener: (result, value) {
+                                              if (result == InterstitialAdResult.LOADED)
+                                                FacebookInterstitialAd.showInterstitialAd(delay: 5000);
+                                            },
+                                          );
+                                          Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index],snapshot.data)));
+                                          print('Interstitial ad is still loading...');
+                                        }
                                       },
                                       child: PropertyTile(list[index],snapshot.data)
                                   );
@@ -1327,7 +1483,42 @@ class _PropertyListState extends State<PropertyList> {
                               ],
                             ),
                           ),
+                        ),
+                        Align(
+                          alignment: Alignment.bottomCenter,
+                          child: isAdmobLoadedForBanner?AdmobBanner(
+                            adUnitId: androidAdmobBanner,
+                            adSize: bannerSize,
+                            listener: (AdmobAdEvent event,
+                                Map<String, dynamic> args) {
+                              handleEvent(event, args, 'Banner');
+                            }, onBannerCreated: (AdmobBannerController controller) {
+                          },
+                          ):Container(
+                            alignment: Alignment(0.5, 1),
+                            child: FacebookBannerAd(
+                              placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
+                              bannerSize: BannerSize.STANDARD,
+                              listener: (result, value) {
+                                switch (result) {
+                                  case BannerAdResult.ERROR:
+                                    print("Error: $value");
+                                    break;
+                                  case BannerAdResult.LOADED:
+                                    print("Loaded: $value");
+                                    break;
+                                  case BannerAdResult.CLICKED:
+                                    print("Clicked: $value");
+                                    break;
+                                  case BannerAdResult.LOGGING_IMPRESSION:
+                                    print("Logging Impression: $value");
+                                    break;
+                                }
+                              },
+                            ),
+                          )
                         )
+
 
 
                       ],

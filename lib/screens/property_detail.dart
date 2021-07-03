@@ -1,4 +1,8 @@
+import 'dart:io';
+
+import 'package:admob_flutter/admob_flutter.dart';
 import 'package:date_format/date_format.dart';
+import 'package:facebook_audience_network/facebook_audience_network.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/cupertino.dart';
@@ -26,16 +30,91 @@ class _PropertyDetailState extends State<PropertyDetail> {
   bool isFavourite = false;
   List<Widget> slideShowWidget=[];
 
+  AdmobBannerSize bannerSize;
+  AdmobInterstitial interstitialAd;
+  bool isAdmobLoadedForBanner=true;
+  bool isAdmobLoadedForInterstitial=true;
+
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
+    Admob.requestTrackingAuthorization();
+    bannerSize = AdmobBannerSize.LARGE_BANNER;
+
+    interstitialAd = AdmobInterstitial(
+      adUnitId: "ca-app-pub-3940256099942544/1033173712",
+      listener: (AdmobAdEvent event, Map<String, dynamic> args) {
+        if (event == AdmobAdEvent.closed) interstitialAd.load();
+        handleEvent(event, args, 'Interstitial');
+      },
+    );
+
+
+
+    interstitialAd.load();
+    interstitialAd.isLoaded.then((value) => interstitialAd.show());
+
+
     checkFavouriteFromDatabase();
     for(int i=0;i<widget._property.image.length;i++){
       slideShowWidget.add(_slider(widget._property.image[i]));
     }
 
   }
+
+  void handleEvent(
+      AdmobAdEvent event, Map<String, dynamic> args, String adType) {
+    switch (event) {
+      case AdmobAdEvent.loaded:
+        print('New Admob $adType Ad loaded!');
+        break;
+      case AdmobAdEvent.opened:
+        print('Admob $adType Ad opened!');
+        break;
+      case AdmobAdEvent.closed:
+        print('Admob $adType Ad closed!');
+        break;
+      case AdmobAdEvent.failedToLoad:
+        if(adType=="Banner"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        if(adType=="Interstitial"){
+          setState(() {
+            isAdmobLoadedForBanner=false;
+          });
+        }
+        print('Admob $adType failed to load. :(');
+        break;
+      case AdmobAdEvent.rewarded:
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return WillPopScope(
+              child: AlertDialog(
+                content: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text('Reward callback fired. Thanks Andrew!'),
+                    Text('Type: ${args['type']}'),
+                    Text('Amount: ${args['amount']}'),
+                  ],
+                ),
+              ),
+              onWillPop: () async {
+                print("snack bar popped");
+                return true;
+              },
+            );
+          },
+        );
+        break;
+      default:
+    }
+  }
+
 
   checkFavouriteFromDatabase()async{
     User user=FirebaseAuth.instance.currentUser;
@@ -167,6 +246,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                     autoPlayInterval: 10000,
                   ),
                 ),
+
 
                 Container(
                   height: 50,
@@ -458,6 +538,38 @@ class _PropertyDetailState extends State<PropertyDetail> {
                   margin: EdgeInsets.all(10),
                   child: Text(widget.lang?widget._property.agentName:widget._property.agentName_ar,style: TextStyle(color: Colors.grey,fontSize: 15),),
                 ),
+                isAdmobLoadedForBanner?AdmobBanner(
+                  adUnitId: androidAdmobBanner,
+                  adSize: bannerSize,
+                  listener: (AdmobAdEvent event,
+                      Map<String, dynamic> args) {
+                    handleEvent(event, args, 'Banner');
+                  }, onBannerCreated: (AdmobBannerController controller) {
+                },
+                ):Container(
+                  alignment: Alignment(0.5, 1),
+                  child: FacebookBannerAd(
+                    placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
+                    bannerSize: BannerSize.STANDARD,
+                    listener: (result, value) {
+                      switch (result) {
+                        case BannerAdResult.ERROR:
+                          print("Error: $value");
+                          break;
+                        case BannerAdResult.LOADED:
+                          print("Loaded: $value");
+                          break;
+                        case BannerAdResult.CLICKED:
+                          print("Clicked: $value");
+                          break;
+                        case BannerAdResult.LOGGING_IMPRESSION:
+                          print("Logging Impression: $value");
+                          break;
+                      }
+                    },
+                  ),
+                ),
+
                 SizedBox(height: 80,),
               ],
             ),
