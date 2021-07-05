@@ -9,12 +9,15 @@ void main() async{
   WidgetsFlutterBinding.ensureInitialized();
   Admob.initialize();
   await Firebase.initializeApp();
-  runApp(EasyLocalization(
+  await EasyLocalization.ensureInitialized();
+  runApp(
+    EasyLocalization(
       supportedLocales: [Locale('en', 'US'), Locale('ar', 'EG')],
       path: 'assets/json',
       fallbackLocale: Locale('ar', 'EG'),
       child: MyApp()
-  ),);
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {

@@ -118,7 +118,7 @@ class _RegisterState extends State<Register> {
                                     } else {
                                       pr.hide();
                                       print('User is signed in!');
-                                      final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+                                      final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
                                       _firebaseMessaging.subscribeToTopic('user');
                                       _firebaseMessaging.getToken().then((value) {
                                         print(value);

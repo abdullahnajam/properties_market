@@ -28,31 +28,32 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
-  firebase_auth: ^0.18.3
-  firebase_core: ^0.5.3
+  firebase_auth: ^2.0.0
+  firebase_core: ^1.3.0
   toast: ^0.1.5
   date_format: ^1.0.9
-  firebase_storage: ^4.0.0
-  firebase_database: ^4.4.0
+  firebase_storage: ^9.0.0
+  firebase_database: ^7.1.1
   progress_dialog: ^1.2.4
   flutter_image_slideshow: ^0.0.4
   cached_network_image: ^2.5.1
   page_transition: ^1.1.7+6
-  flutter_launcher_icons: ^0.8.1
-  easy_localization: ^2.3.2
-  image_picker: ^0.6.7+17
-  firebase_messaging: ^7.0.3
-  overlay_support: ^1.0.0
+  flutter_launcher_icons: ^0.9.0
+  easy_localization: ^3.0.0
+  image_picker: ^0.8.1+3
+  firebase_messaging: ^10.0.3
+  overlay_support: ^1.2.1
   flutter_open_whatsapp: ^0.1.2
-  url_launcher: ^5.7.10
-  shared_preferences: ^0.5.12
+  url_launcher: ^6.0.8
+  shared_preferences: ^2.0.6
   video_player: ^1.0.1
   http: any
   rxdart: any
-  lottie: ^0.7.0
-  webview_flutter: ^1.0.7
+  lottie: ^1.0.1
+  webview_flutter: ^2.0.9
   admob_flutter: ^1.0.1
   facebook_audience_network: ^0.9.0
+  flutter_local_notifications: ^6.0.0
   flutter_facebook_sdk:
 
 flutter_icons:

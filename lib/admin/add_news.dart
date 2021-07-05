@@ -1,7 +1,7 @@
 import 'dart:io';
 
 import 'package:firebase_database/firebase_database.dart';
-import 'package:firebase_storage/firebase_storage.dart';
+import 'package:firebase_storage/firebase_storage.dart' as firebase_storage;
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -49,9 +49,9 @@ class _AddNewsState extends State<AddNews> {
   Future uploadImageToFirebase(BuildContext context) async {
     final ProgressDialog pr = ProgressDialog(context);
     await pr.show();
-    StorageReference firebaseStorageRef = FirebaseStorage.instance.ref().child('uploads/${DateTime.now().millisecondsSinceEpoch}');
-    StorageUploadTask uploadTask = firebaseStorageRef.putFile(imagefile);
-    StorageTaskSnapshot taskSnapshot = await uploadTask.onComplete;
+    firebase_storage.Reference firebaseStorageRef = firebase_storage.FirebaseStorage.instance.ref().child('uploads/${DateTime.now().millisecondsSinceEpoch}');
+    firebase_storage.UploadTask uploadTask = firebaseStorageRef.putFile(imagefile);
+    firebase_storage.TaskSnapshot taskSnapshot = await uploadTask;
     taskSnapshot.ref.getDownloadURL().then(
           (value) {
         imageUrl=value;
@@ -60,11 +60,11 @@ class _AddNewsState extends State<AddNews> {
     );
   }
   Future<File> _chooseGallery() async{
-    await ImagePicker.pickImage(source: ImageSource.gallery).then((value) => fileSet(value));
+    await ImagePicker().getImage(source: ImageSource.gallery).then((value) => fileSet(File(value.path)));
 
   }
   Future<File> _choosecamera() async{
-    await ImagePicker.pickImage(source: ImageSource.camera).then((value) => fileSet(value));
+    await ImagePicker().getImage(source: ImageSource.camera).then((value) => fileSet(File(value.path)));
 
   }
   void _showPicker(context) {

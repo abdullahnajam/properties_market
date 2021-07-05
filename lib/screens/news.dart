@@ -198,7 +198,7 @@ class _NewsState extends State<News> {
                                       separatorBuilder: (context, position) {
                                         return Container(
                                             margin: EdgeInsets.only(bottom: 10),
-                                            child: (position != 0 && position % 2 == 0) ?
+                                            child: (position != 0 && position % 3 == 0) ?
                                             isAdmobLoadedForBanner?AdmobBanner(
                                               adUnitId: androidAdmobBanner,
                                               adSize: bannerSize,
@@ -313,7 +313,7 @@ class _NewsState extends State<News> {
                         alignment: Alignment.bottomCenter,
                         child: isAdmobLoadedForBanner?AdmobBanner(
                           adUnitId: androidAdmobBanner,
-                          adSize: bannerSize,
+                          adSize: AdmobBannerSize.BANNER,
                           listener: (AdmobAdEvent event,
                               Map<String, dynamic> args) {
                             handleEvent(event, args, 'Banner');

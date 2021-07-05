@@ -65,7 +65,7 @@ class _AdminSearchListState extends State<AdminSearchList> {
               context, MaterialPageRoute(builder: (BuildContext context) => AddProperty()));
         },
       ),
-      resizeToAvoidBottomPadding: false,
+      //resizeToAvoidBottomPadding: false,
     );
   }
   final GlobalKey<ScaffoldState> _drawerKey = GlobalKey();

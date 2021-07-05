@@ -26,42 +26,19 @@ class HomePage extends StatefulWidget {
 
 class _HomePageState extends State<HomePage> {
 
-  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
+  final FirebaseMessaging _firebaseMessaging = FirebaseMessaging.instance;
   String _message = '';
   SharedPref sharedPref=new SharedPref();
 
 
 
 
-  void getMessage() {
-    _firebaseMessaging.configure(
-        onMessage: (Map<String, dynamic> message) async {
-          print('received message');
-          setState(() => _message = message["notification"]["body"]);
-          showOverlayNotification((context) {
-            return Card(
-              margin: EdgeInsets.all(10),
-              child: SafeArea(
-                child: ListTile(
-                  title: Text(message['notification']['title']),
-                  subtitle: Text(message['notification']['body']),
-                  trailing: IconButton(
-                      icon: Icon(Icons.close),
-                      onPressed: () {
-                        OverlaySupportEntry.of(context).dismiss();
-                      }),
-                ),
-              ),
-            );
-          }, duration: Duration(milliseconds: 4000));
-        }, onResume: (Map<String, dynamic> message) async {
-      print('on resume $message');
-      setState(() => _message = message["notification"]["body"]);
-    }, onLaunch: (Map<String, dynamic> message) async {
-      print('on launch $message');
-      setState(() => _message = message["notification"]["body"]);
-    });
-  }
+
+
+
+
+
+
   AdmobBannerSize bannerSize;
   AdmobInterstitial interstitialAd;
   bool isAdmobLoadedForBanner=true;
@@ -83,7 +60,14 @@ class _HomePageState extends State<HomePage> {
 
     interstitialAd.load();
 
-    getMessage();
+    FirebaseMessaging.onMessage.listen((RemoteMessage event) {
+      print("message recieved");
+      print(event.notification.body);
+    });
+    FirebaseMessaging.onMessageOpenedApp.listen((message) {
+      print('Message clicked!');
+    });
+
     SharedPref sharedPref=new SharedPref();
     sharedPref.getPref().then((value) {
       print("value $value");
