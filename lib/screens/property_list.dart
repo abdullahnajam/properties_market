@@ -909,13 +909,6 @@ class _PropertyListState extends State<PropertyList> {
                                   }
                                 }
                                 else {
-                                  FacebookInterstitialAd.loadInterstitialAd(
-                                    placementId: androidFanInterstitialVideo,
-                                    listener: (result, value) {
-                                      if (result == InterstitialAdResult.LOADED)
-                                        FacebookInterstitialAd.showInterstitialAd(delay: 5000);
-                                    },
-                                  );
                                   if(snapshot.data){
 
                                     final result = await showSearch<String>(
@@ -929,6 +922,7 @@ class _PropertyListState extends State<PropertyList> {
                                       delegate: NameSearch(searchRest),
                                     );
                                   }
+
                                   print('Interstitial ad is still loading...');
                                 }
 
@@ -1020,7 +1014,7 @@ class _PropertyListState extends State<PropertyList> {
                                   return Container(
                                     margin: EdgeInsets.only(bottom: 10),
                                       child: (position != 0 && position % 4 == 0) ?
-                                  isAdmobLoadedForBanner?AdmobBanner(
+                                  AdmobBanner(
                                     adUnitId: androidAdmobBanner,
                                     adSize: bannerSize,
                                     listener: (AdmobAdEvent event,
@@ -1028,28 +1022,6 @@ class _PropertyListState extends State<PropertyList> {
                                       handleEvent(event, args, 'Banner');
                                     }, onBannerCreated: (AdmobBannerController controller) {
                                     },
-                                  ):Container(
-                                    alignment: Alignment(0.5, 1),
-                                    child: FacebookBannerAd(
-                                      placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
-                                      bannerSize: BannerSize.STANDARD,
-                                      listener: (result, value) {
-                                        switch (result) {
-                                          case BannerAdResult.ERROR:
-                                            print("Error: $value");
-                                            break;
-                                          case BannerAdResult.LOADED:
-                                            print("Loaded: $value");
-                                            break;
-                                          case BannerAdResult.CLICKED:
-                                            print("Clicked: $value");
-                                            break;
-                                          case BannerAdResult.LOGGING_IMPRESSION:
-                                            print("Logging Impression: $value");
-                                            break;
-                                        }
-                                      },
-                                    ),
                                   ): Container());
                                   },
                                 physics: NeverScrollableScrollPhysics(),
@@ -1063,13 +1035,6 @@ class _PropertyListState extends State<PropertyList> {
                                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index],snapshot.data)));
                                         }
                                         else {
-                                          FacebookInterstitialAd.loadInterstitialAd(
-                                            placementId: androidFanInterstitialVideo,
-                                            listener: (result, value) {
-                                              if (result == InterstitialAdResult.LOADED)
-                                                FacebookInterstitialAd.showInterstitialAd(delay: 5000);
-                                            },
-                                          );
                                           Navigator.push(context, MaterialPageRoute(builder: (BuildContext context) => PropertyDetail(list[index],snapshot.data)));
                                           print('Interstitial ad is still loading...');
                                         }
@@ -1486,7 +1451,7 @@ class _PropertyListState extends State<PropertyList> {
                         ),
                         Align(
                           alignment: Alignment.bottomCenter,
-                          child: isAdmobLoadedForBanner?AdmobBanner(
+                          child: AdmobBanner(
                             adUnitId: androidAdmobBanner,
                             adSize: bannerSize,
                             listener: (AdmobAdEvent event,
@@ -1494,28 +1459,6 @@ class _PropertyListState extends State<PropertyList> {
                               handleEvent(event, args, 'Banner');
                             }, onBannerCreated: (AdmobBannerController controller) {
                           },
-                          ):Container(
-                            alignment: Alignment(0.5, 1),
-                            child: FacebookBannerAd(
-                              placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
-                              bannerSize: BannerSize.STANDARD,
-                              listener: (result, value) {
-                                switch (result) {
-                                  case BannerAdResult.ERROR:
-                                    print("Error: $value");
-                                    break;
-                                  case BannerAdResult.LOADED:
-                                    print("Loaded: $value");
-                                    break;
-                                  case BannerAdResult.CLICKED:
-                                    print("Clicked: $value");
-                                    break;
-                                  case BannerAdResult.LOGGING_IMPRESSION:
-                                    print("Logging Impression: $value");
-                                    break;
-                                }
-                              },
-                            ),
                           )
                         )
 

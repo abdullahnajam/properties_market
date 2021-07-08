@@ -181,7 +181,6 @@ class _BottomNavigationState extends State<BottomBar>{
   }
   AdmobBannerSize bannerSize;
   AdmobInterstitial interstitialAd;
-  AdmobReward rewardAd;
 
   @override
   void initState() {
@@ -212,8 +211,6 @@ class _BottomNavigationState extends State<BottomBar>{
     interstitialAd.load();
 
   }
-  bool isAdmobLoadedForBanner=true;
-  bool isAdmobLoadedForInterstitial=true;
   void handleEvent(
       AdmobAdEvent event, Map<String, dynamic> args, String adType) {
     switch (event) {
@@ -227,17 +224,7 @@ class _BottomNavigationState extends State<BottomBar>{
         print('Admob $adType Ad closed!');
         break;
       case AdmobAdEvent.failedToLoad:
-        if(adType=="Banner"){
-          setState(() {
-            isAdmobLoadedForBanner=false;
-          });
-        }
-        if(adType=="Interstitial"){
-          setState(() {
-            isAdmobLoadedForBanner=false;
-          });
-        }
-        print('Admob $adType failed to load. :(');
+        print('Admob $adType Ad failed!');
         break;
       case AdmobAdEvent.rewarded:
         showDialog(
@@ -275,13 +262,6 @@ class _BottomNavigationState extends State<BottomBar>{
         });
       }
       else {
-        FacebookInterstitialAd.loadInterstitialAd(
-          placementId: androidFanInterstitialVideo,
-          listener: (result, value) {
-            if (result == InterstitialAdResult.LOADED)
-              FacebookInterstitialAd.showInterstitialAd(delay: 5000);
-          },
-        );
         setState(() {
           _currentIndex = index;
         });
@@ -296,16 +276,10 @@ class _BottomNavigationState extends State<BottomBar>{
         });
       }
       else {
-        FacebookInterstitialAd.loadInterstitialAd(
-          placementId: androidFanInterstitialVideo,
-          listener: (result, value) {
-            if (result == InterstitialAdResult.LOADED)
-              FacebookInterstitialAd.showInterstitialAd(delay: 5000);
-          },
-        );
         setState(() {
           _currentIndex = index;
         });
+
       }
     }
     else if(index==2){

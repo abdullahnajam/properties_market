@@ -511,9 +511,19 @@ class _PropertyDetailState extends State<PropertyDetail> {
                           ],
                         ),
                       ),
+                      AdmobBanner(
+                        adUnitId: androidAdmobBanner,
+                        adSize: bannerSize,
+                        listener: (AdmobAdEvent event,
+                            Map<String, dynamic> args) {
+                          handleEvent(event, args, 'Banner');
+                        }, onBannerCreated: (AdmobBannerController controller) {
+                      },
+                      ),
                     ],
                   ),
                 ),
+
                 Container(
                   margin: EdgeInsets.all(10),
                   child: Text('location'.tr(),style: TextStyle(color: Colors.black,fontSize: 18,fontWeight: FontWeight.w500),),
@@ -538,7 +548,7 @@ class _PropertyDetailState extends State<PropertyDetail> {
                   margin: EdgeInsets.all(10),
                   child: Text(widget.lang?widget._property.agentName:widget._property.agentName_ar,style: TextStyle(color: Colors.grey,fontSize: 15),),
                 ),
-                isAdmobLoadedForBanner?AdmobBanner(
+                AdmobBanner(
                   adUnitId: androidAdmobBanner,
                   adSize: bannerSize,
                   listener: (AdmobAdEvent event,
@@ -546,28 +556,6 @@ class _PropertyDetailState extends State<PropertyDetail> {
                     handleEvent(event, args, 'Banner');
                   }, onBannerCreated: (AdmobBannerController controller) {
                 },
-                ):Container(
-                  alignment: Alignment(0.5, 1),
-                  child: FacebookBannerAd(
-                    placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
-                    bannerSize: BannerSize.STANDARD,
-                    listener: (result, value) {
-                      switch (result) {
-                        case BannerAdResult.ERROR:
-                          print("Error: $value");
-                          break;
-                        case BannerAdResult.LOADED:
-                          print("Loaded: $value");
-                          break;
-                        case BannerAdResult.CLICKED:
-                          print("Clicked: $value");
-                          break;
-                        case BannerAdResult.LOGGING_IMPRESSION:
-                          print("Logging Impression: $value");
-                          break;
-                      }
-                    },
-                  ),
                 ),
 
                 SizedBox(height: 80,),

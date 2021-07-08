@@ -129,38 +129,20 @@ class _NewsDetailsState extends State<NewsDetails> {
 
           ),
           SizedBox(height: 10,),
-          Text(widget.language?widget.news.details:widget.news.details_ar),
+          Container(
+            margin: EdgeInsets.all(10),
+            child: Text(widget.language?widget.news.details:widget.news.details_ar,),
+          ),
           SizedBox(height: 10,),
-          isAdmobLoadedForBanner?AdmobBanner(
+          AdmobBanner(
             adUnitId: androidAdmobBanner,
             adSize: bannerSize,
             listener: (AdmobAdEvent event,
                 Map<String, dynamic> args) {
+              print("admob");
               handleEvent(event, args, 'Banner');
             }, onBannerCreated: (AdmobBannerController controller) {
           },
-          ):Container(
-            alignment: Alignment(0.5, 1),
-            child: FacebookBannerAd(
-              placementId: Platform.isAndroid ? androidFanBanner : iosFanBanner,
-              bannerSize: BannerSize.STANDARD,
-              listener: (result, value) {
-                switch (result) {
-                  case BannerAdResult.ERROR:
-                    print("Error: $value");
-                    break;
-                  case BannerAdResult.LOADED:
-                    print("Loaded: $value");
-                    break;
-                  case BannerAdResult.CLICKED:
-                    print("Clicked: $value");
-                    break;
-                  case BannerAdResult.LOGGING_IMPRESSION:
-                    print("Logging Impression: $value");
-                    break;
-                }
-              },
-            ),
           )
 
         ],

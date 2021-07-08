@@ -981,18 +981,10 @@ class _HomePageState extends State<HomePage> {
                       }
                     }
                     else {
-                      FacebookInterstitialAd.loadInterstitialAd(
-                        placementId: androidFanInterstitialVideo,
-                        listener: (result, value) {
-                          if (result == InterstitialAdResult.LOADED)
-                            FacebookInterstitialAd.showInterstitialAd(delay: 5000);
-                        },
-                      );
                       if(selectedCityId!=null && selectedCountryId!=null && selectedAreaName!=null && selectedTypeId!=null){
                         Navigator.push(context,
                             MaterialPageRoute(builder: (BuildContext context) => PropertyList(engCountry,engCity,engArea,engType,isRent)));
                       }
-                      print('Interstitial ad is still loading...');
                     }
 
 

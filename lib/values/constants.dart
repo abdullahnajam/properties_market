@@ -17,9 +17,9 @@ const String kPhoneNumberNullError = "Please Enter your phone number";
 const String kAddressNullError = "Please Enter your address";
 const String url="https://www.freeprivacypolicy.com/live/b36b4963-0837-491b-ac0b-dadb078b2120";
 const String androidInterstitialVideo="ca-app-pub-9395198588563221/8384182785";
-const String androidAdmobBanner="ca-app-pub-9395198588563221/8108016460";
+const String androidAdmobBanner="ca-app-pub-9395198588563221/8108016460";/*
 const String androidFanBanner="4072676972810543_4084550341623206";
-const String androidFanInterstitialVideo="4072676972810543_4084573791620861";
+const String androidFanInterstitialVideo="4072676972810543_4084573791620861";*/
 const String iosFanBanner="";
 const String iosFanInterstitialVideo="";
 
